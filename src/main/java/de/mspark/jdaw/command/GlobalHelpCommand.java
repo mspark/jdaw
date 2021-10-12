@@ -23,10 +23,10 @@ public abstract class GlobalHelpCommand extends Command {
 
     @Override
     public void doActionOnCmd(Message msg, List<String> cmdArguments) {
-        if (cmdArguments.size() == 1) {
+        if (cmdArguments.isEmpty()) {
             msg.getChannel().sendMessage(fullHelpPage()).submit();            
         } else {
-            String wantedHelpPage = cmdArguments.get(1);
+            String wantedHelpPage = cmdArguments.get(0);
             if (wantedHelpPage.equals("intro")) {
                 sendIntroduction(msg);
             } else {

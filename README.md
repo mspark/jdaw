@@ -3,8 +3,8 @@ Example Application start.
 
 ```java
 @SpringBootApplication
-@ConfigurationPropertiesScan({"own.package})
-@ComponentScan(basePackages = "de.mspark.jdaw.jda")
+@ConfigurationPropertiesScan({"own.package"})
+@ComponentScan({"de.mspark.jdaw.jda", "own.package"})
 public class SpeedmeetApplication {
 
     public static void main(String[] args) {

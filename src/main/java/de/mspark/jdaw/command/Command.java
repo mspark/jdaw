@@ -1,5 +1,6 @@
 package de.mspark.jdaw.command;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,13 +29,14 @@ public abstract class Command extends TextListener {
             annotation = tsadas.annotationType().getDeclaredAnnotation(CommandProperties.class);
         }
         commandProperties = annotation;
-        jdas.getMain().addEventListener(this);
     }
     
     /**
      * The action which is executed when the command matches. 
+     * 
      * @param event
-     * @param cmd Command with arguments without prefix
+     * @param cmd The list of addiotional arguments of the command. The trigger itself is not present. May be empty 
+     *            when no arguments were given.
      */
     public abstract void doActionOnCmd(Message msg, List<String> cmdArguments);
     
@@ -56,8 +58,10 @@ public abstract class Command extends TextListener {
 
     @Override
     public void onTextMessageReceived(MessageReceivedEvent event) {
+        System.out.println(1);
         var arguments = getCmdArguments(event.getMessage());
         if (matchesTrigger(event.getMessage())) {
+            arguments.remove(0);
             invoke(event, arguments);
         }
     }
@@ -74,8 +78,7 @@ public abstract class Command extends TextListener {
     }
 
     private void invoke(MessageReceivedEvent event, List<String> arguments) {
-        boolean enoughArguments = commandProperties.executableWihtoutArgs() || arguments.size() > 1;
-        
+        boolean enoughArguments = commandProperties.executableWihtoutArgs() || arguments.size() >= 1;
         if (!permissionUserCheck(event)) {
             event.getChannel().sendMessage("❌ Missing Permission").submit(); // TODO write what permission
         } else if (enoughArguments && botPermissionCheck(event)) {
@@ -86,12 +89,11 @@ public abstract class Command extends TextListener {
     }
 
     protected List<String> getCmdArguments(Message msg) {
-        // TODO remove first argument
         String[] arguments = msg.getContentRaw().split("\\s+");
         if (arguments.length > 0 && arguments[0].startsWith(conf.prefix())) {
-            arguments[0] = arguments[0].substring(1); // remove prefix
+            arguments[0] = arguments[0].substring(1);
         }
-        return Arrays.asList(arguments);
+        return new ArrayList<String>(Arrays.asList(arguments));
     }
     
     private boolean permissionUserCheck(MessageReceivedEvent event) {
