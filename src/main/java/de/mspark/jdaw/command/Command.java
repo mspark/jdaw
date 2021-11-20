@@ -3,9 +3,12 @@ package de.mspark.jdaw.command;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import de.mspark.jdaw.jda.JDAManager;
 import de.mspark.jdaw.jda.JDAWConfig;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -79,9 +82,20 @@ public abstract class Command extends TextListener {
 
     private void invoke(MessageReceivedEvent event, List<String> arguments) {
         boolean enoughArguments = commandProperties.executableWihtoutArgs() || arguments.size() >= 1;
-        if (!permissionUserCheck(event)) {
-            event.getChannel().sendMessage("❌ Missing Permission").submit(); // TODO write what permission
-        } else if (enoughArguments && botPermissionCheck(event)) {
+        var missingUserPerm = extractMissingPermission(commandProperties.userGuildPermissions(), event.getMember().getPermissions());
+        Member ownUser = event.getGuild().getSelfMember();
+        var missingBotPerm = extractMissingPermission(commandProperties.botGuildPermissions(), ownUser.getPermissions());
+        
+        if (!missingUserPerm.isEmpty()) {
+            var embed = new EmbedBuilder().setDescription("❌ Missing Permission:\n");
+            missingUserPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
+            event.getChannel().sendMessage(embed.build()).submit();
+        }
+        if (!missingBotPerm.isEmpty()) {
+            var embed = new EmbedBuilder().setDescription("The bot needs the following permissions in order to execute the command:\n");
+            missingBotPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
+            event.getChannel().sendMessage(embed.build()).submit();
+        } else if (enoughArguments){
             doActionOnCmd(event.getMessage(), arguments);
         } else {
             event.getChannel().sendMessage("Zu wenig Argumente!. Benutze den help befehl").submit();
@@ -96,18 +110,9 @@ public abstract class Command extends TextListener {
         return new ArrayList<String>(Arrays.asList(arguments));
     }
     
-    private boolean permissionUserCheck(MessageReceivedEvent event) {
-        return event.getMember().getPermissions().containsAll(Arrays.asList(commandProperties.userGuildPermissions()));
-    }
-   
-    protected boolean botPermissionCheck(MessageReceivedEvent event) {
-        var gPerm = commandProperties.botGuildPermissions();
-        boolean permissionAvailable = true;
-        Member ownUser = event.getGuild().getSelfMember();
-        if (!ownUser.getPermissions().containsAll(Arrays.asList(gPerm))) {
-            event.getChannel().sendMessage("Folgende Serverrechte sind für diesen Befehl notwendig:" + Arrays.toString(gPerm)).submit();
-            permissionAvailable = false;
-        }
-        return permissionAvailable;
+    private List<Permission> extractMissingPermission(Permission[] neededPermission, Set<Permission> givenPermissions) {
+        var neededPermList= new ArrayList<Permission>(Arrays.asList(neededPermission));
+        neededPermList.removeAll(givenPermissions);
+        return neededPermList;
     }
 }
