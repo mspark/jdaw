@@ -5,7 +5,7 @@
 	<groupId>de.mspark</groupId>
 	<artifactId>jdaw</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1</version>
+	<version>1.2</version>
 	<name>jdaw</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -47,6 +47,13 @@
 		</dependency>
 	</dependencies>
 
+	<distributionManagement>
+		<repository>
+			<id>github-jdaw</id>
+			<name>JDAW GitHub Packages</name>
+			<url>https://maven.pkg.github.com/mspark/jdaw</url>
+		</repository>
+	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>dv8tion</id>

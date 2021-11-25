@@ -1,7 +1,11 @@
 
-JDAW is a wrapper for dv8tion-JDA with spring. It tries to simplify multiple commands in one bot with multiple tokens. 
+JDAW is a wrapper for dv8tion-JDA with spring. It tries to simplify the development of independent commands. JDAW also supports multiple discord tokens at once. 
+
+
+You need at least one configured bot token. When giving multiple bot token, the first one in the list is always the "main" bot. 
 
 ### Commands
+
 
 A single Command can be written like:
 
@@ -11,21 +15,20 @@ A single Command can be written like:
 public class ConfigCommand extends Command {....}
 
 ```
-The Config command will be available as spring bean as well.
 
-Every action is done on the Main Discord bot (the first provided token). If you want to balance your actions 
+The Config command will be available as spring bean as well. Every command is executed on by the main bot. This behaviour is configurable. 
 
 ### Global Help Command
-The global help command creates a help page for all other command implementations and a short description of the whole application as well.
-In order to acitivate it you must implement the `GlobalHelpCommand` class with the `@HelpCmd` annotation. The short description is visible on the front page
+The global help command creates a help page for all command implementations and a short description of the whole application as well.
+
+In order to acitivate the help command, implement the `GlobalHelpCommand` class with the `@HelpCmd` annotation. 
 
 ### Other Actions
-If you want to run additional actions on any other configured bot, you can use the JDAManager inside a command.  
+If you want to run additional actions on any other configured bot, you can use the `JDAManager` inside a command implementation.  
 
 ### Setup
 
-In order to stat the application the spring components from JDAW must be found by spring. In order to do that you have to enable the ComponentScan.
-Example Application start. 
+In order to start the application the spring components from JDAW must be found by spring. Enable the `ComponentScan`: 
 
 ```java
 @SpringBootApplication
@@ -39,7 +42,9 @@ public class Application {
 }
 
 ```
-In addition to that, you have to implement the `JDAWConfig` interface. If you want to load it from a file it could look like the following example:
+In addition to that, you have to implement the `JDAWConfig` interface to configure your application.
+
+Loading from file:
 
 ```java
 @ConstructorBinding /* Remove when updating to Spring 2.6 */
@@ -50,7 +55,7 @@ public record Config(
 	String[] apiTokens) implements JDAWConfig {}
 ```
 
-Or if you want to have it in your code, you could define a bean:
+Via Bean: 
 
 ```java
 @Bean
@@ -74,8 +79,7 @@ public JDAWConfig jdawConfig() {
     };
 }
 ```
-
-If you need to modify the JDA configuration (like enabling caching) you do this by providing multiple beans for `JDAConfigurationVisitor` interface. All provided beans will load on startup and can manipulate the JDABuilder. Example for enabling MemberCache: 
+For modifying the JDA configuraiton, provide one or multiple beans of `JDAConfigurationVisitor`. Example for enable member caching:
 
 ```java
 @Bean
@@ -86,3 +90,16 @@ public JDAConfigurationVisitor jdaConfigurationVisitor() {
 }
 ```
 
+### Use the project
+```
+<dependencies>
+  <dependency>
+    <groupId>de.mspark.de</groupId>
+    <artifactId>jdaw</artifactId>
+    <version>1.2</version>
+  </dependency>
+</dependencies>
+
+```
+
+In order to use github packages, you need to configure your maven according to the offical [github documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token).
