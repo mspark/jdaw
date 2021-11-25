@@ -11,11 +11,15 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public abstract class TextListener extends ListenerAdapter {
     protected final JDAWConfig conf;
     
-    public TextListener(JDAWConfig conf, JDAManager jdas) {
+    public TextListener(JDAWConfig conf, JDAManager jdas, boolean balance) {
         this.conf = conf;
-        jdas.getMain().addEventListener(this);
+        if (balance) {
+            jdas.getNextJDA().addEventListener(this);            
+        } else {
+            jdas.getMain().addEventListener(this);
+        }
     }
-
+    
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.isFromType(ChannelType.TEXT)
@@ -29,4 +33,6 @@ public abstract class TextListener extends ListenerAdapter {
     }
 
     public abstract void onTextMessageReceived(MessageReceivedEvent event);
+    
+
 }

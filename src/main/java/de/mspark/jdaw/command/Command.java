@@ -25,11 +25,26 @@ public abstract class Command extends TextListener {
     private CommandProperties commandProperties;
     
     public Command(JDAWConfig conf, JDAManager jdas) {
-        super(conf, jdas);
+        this(conf, jdas, true);
+    }
+    
+    /**
+     * Defines a command. {@link CommandProperties} is necessary to define properties. 
+     * 
+     * @param conf
+     * @param jdas
+     * @param balance When true, the command is executed (and listens) on any configured discord bot otherwise its 
+     *        always the main bot
+     */
+    public Command(JDAWConfig conf, JDAManager jdas, boolean balance) {
+        super(conf, jdas, balance);
         var annotation = this.getClass().getAnnotation(CommandProperties.class);
         if (annotation == null) {
             var tsadas = this.getClass().getAnnotation(HelpCmd.class);
             annotation = tsadas.annotationType().getDeclaredAnnotation(CommandProperties.class);
+            if (annotation == null) {
+                throw new Error("No annotation with properties found. Fix this and rebuild application");
+            }
         }
         commandProperties = annotation;
     }
@@ -61,7 +76,6 @@ public abstract class Command extends TextListener {
 
     @Override
     public void onTextMessageReceived(MessageReceivedEvent event) {
-        System.out.println(1);
         var arguments = getCmdArguments(event.getMessage());
         if (matchesTrigger(event.getMessage())) {
             arguments.remove(0);

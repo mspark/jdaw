@@ -1,31 +1,36 @@
 package de.mspark.jdaw.jda;
 
 import net.dv8tion.jda.api.JDA;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.springframework.stereotype.Component;
 
+/**
+ * Thread safe way to receive balance all actions to all available JDA instances. 
+ * 
+ * This does not mean, that the JDAs by itself are thread safe.
+ * 
+ * @author marcel
+ */
 @Component
 public class JDAManager {
 
     private final JDA[] jdas;
-    private int jdaIndex = 0;
+    private final AtomicInteger jdaIndex = new AtomicInteger(0);
 
     public JDAManager(JDA[] jdas) {
         this.jdas = jdas;
     }
 
     public JDA getNextJDA() {
-        if (this.jdaIndex + 1 >= jdas.length) {
-            this.jdaIndex = 0;
-        } else {
-            this.jdaIndex++;
-        }
-        JDA jda = jdas[this.jdaIndex];
-        return jda;
+        jdaIndex.compareAndSet(jdas.length, 0);
+        return jdas[jdaIndex.getAndIncrement()];
     }
 
     public JDA getNextJDAWithoutMain() {
         JDA jda = this.getNextJDA();
-        if (this.jdaIndex == 0) {
+        if (this.jdaIndex.get() == 0) {
             return getNextJDAWithoutMain();
         }
         return jda;
