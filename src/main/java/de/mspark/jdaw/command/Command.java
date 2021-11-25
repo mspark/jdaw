@@ -40,7 +40,7 @@ public abstract class Command extends TextListener {
         super(conf, jdas, balance);
         var annotation = this.getClass().getAnnotation(CommandProperties.class);
         if (annotation == null) {
-            var tsadas = this.getClass().getAnnotation(HelpCmd.class);
+            var tsadas = this.getClass().getAnnotation(EnableHelpCommand.class);
             annotation = tsadas.annotationType().getDeclaredAnnotation(CommandProperties.class);
             if (annotation == null) {
                 throw new Error("No annotation with properties found. Fix this and rebuild application");

@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 
 /**
- * When implementing this with the {@link HelpCmd} Annotation, a help command will be available.
+ * When implementing this with the {@link EnableHelpCommand} Annotation, a help command for all sub commands will be available .
  *
  * @author marcel
  */

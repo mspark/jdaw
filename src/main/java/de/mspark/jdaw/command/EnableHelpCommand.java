@@ -5,4 +5,4 @@ import java.lang.annotation.RetentionPolicy;
 
 @CommandProperties(trigger = "", executableWihtoutArgs = true)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HelpCmd {}
+public @interface EnableHelpCommand {}
