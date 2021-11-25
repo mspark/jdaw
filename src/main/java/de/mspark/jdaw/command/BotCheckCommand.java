@@ -1,0 +1,89 @@
+package de.mspark.jdaw.command;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import de.mspark.jdaw.jda.JDAManager;
+import de.mspark.jdaw.jda.JDAWConfig;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageEmbed.Field;
+
+@CommandProperties(trigger = "botcheck", botGuildPermissions = Permission.MANAGE_SERVER, executableWihtoutArgs = true)
+public class BotCheckCommand extends Command {
+
+    private static class BotGuilds {
+        private final JDA bot; 
+        private final List<Guild> guilds; 
+        private final boolean onServer;
+        
+        public BotGuilds(JDA jda, long currentGuildId) {
+            this.bot = jda;
+            guilds = jda.getGuilds();
+            onServer = guilds.stream().anyMatch(g -> g.getIdLong() == currentGuildId);
+        }
+    }
+
+    private JDA[] allBots;
+
+    public BotCheckCommand(JDAWConfig conf, JDAManager jdas, JDA[] allJDA) {
+        super(conf, jdas);
+        this.allBots = allJDA;
+    }
+
+    @Override
+    public void doActionOnCmd(Message msg, List<String> cmdArguments) {
+        checkPowerUps(msg);
+    }
+
+    @Override
+    public MessageEmbed fullHelpPage() {
+        return new EmbedBuilder().setDescription("No help page for this").build();
+    }
+
+    @Override
+    public Field getShortDescription() {
+        return new Field("botcheck [Admin view only]", "Check bot availability on this guild.", false);
+    }
+
+    public void checkPowerUps(Message msg) {
+        long currentGuild = msg.getGuild().getIdLong();
+        List<BotGuilds> botGuildList = createBotList(currentGuild);
+        String botOnGuildText = botOkMessage(botGuildList);
+        String missingBotText = missingBotInfoWithInvites(botGuildList);
+        MessageEmbed embed = new EmbedBuilder()
+                .setTitle("🔭 Bot check")
+                .setDescription(botOnGuildText + "\n" + missingBotText).build();
+        msg.getChannel().sendMessage(embed).submit();
+    }
+
+    private List<BotGuilds> createBotList(long currentGuild) {
+        return Arrays.stream(allBots)
+                .map(jda -> new BotGuilds(jda, currentGuild))
+                .toList();
+    }
+
+    private static String botOkMessage(List<BotGuilds> botGuildList) {
+        String botOnGuildText = botGuildList.stream()
+                .filter(bg -> bg.onServer)
+                .map(bg -> "✅ %s is on this Server".formatted(bg.bot.getSelfUser().getAsTag()))
+                .collect(Collectors.joining("\n"));
+        return botOnGuildText;
+    }
+
+    private static String missingBotInfoWithInvites(List<BotGuilds> botGuildList) {
+        var perms = new Permission[] {Permission.VOICE_MOVE_OTHERS};
+        String missingBotText = botGuildList.stream()
+                .filter(bg -> !bg.onServer)
+                .map(bg -> "❌ %s is not present on this Server. [Invite it.](%s) \n"
+                .formatted(bg.bot.getSelfUser().getAsTag(), bg.bot.getInviteUrl(perms)))
+                .reduce((a,b) -> a + "\n" + b).orElse("\nEvery bot is up!");
+        return missingBotText;
+    }
+
+}

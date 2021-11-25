@@ -25,7 +25,7 @@ public abstract class Command extends TextListener {
     private CommandProperties commandProperties;
     
     public Command(JDAWConfig conf, JDAManager jdas) {
-        this(conf, jdas, true);
+        this(conf, jdas, false);
     }
     
     /**
@@ -123,10 +123,16 @@ public abstract class Command extends TextListener {
         }
         return new ArrayList<String>(Arrays.asList(arguments));
     }
-    
-    private List<Permission> extractMissingPermission(Permission[] neededPermission, Set<Permission> givenPermissions) {
+
+    private static List<Permission> extractMissingPermission(Permission[] neededPermission, Set<Permission> givenPermissions) {
         var neededPermList= new ArrayList<Permission>(Arrays.asList(neededPermission));
         neededPermList.removeAll(givenPermissions);
         return neededPermList;
+    }
+    
+    public boolean userHasEnoughPermission(Message context) {
+        var memberPerm = context.getMember().getPermissions();
+        var missingPerms = extractMissingPermission(commandProperties.userGuildPermissions(), memberPerm);
+        return missingPerms.isEmpty();
     }
 }

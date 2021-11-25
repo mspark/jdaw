@@ -4,7 +4,9 @@ import java.util.List;
 
 import de.mspark.jdaw.jda.JDAManager;
 import de.mspark.jdaw.jda.JDAWConfig;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 
 /**
@@ -24,16 +26,29 @@ public abstract class GlobalHelpCommand extends Command {
     @Override
     public void doActionOnCmd(Message msg, List<String> cmdArguments) {
         if (cmdArguments.isEmpty()) {
-            msg.getChannel().sendMessage(fullHelpPage()).submit();            
+            var eb = new EmbedBuilder().setDescription(botDescription());
+            allLoadedCmds.stream()
+                .filter(cmd -> cmd.userHasEnoughPermission(msg))
+                .map(m -> m.getShortDescription())
+                .forEach(eb::addField);
+            msg.getChannel().sendMessage(eb.build()).submit();
         } else {
             String wantedHelpPage = cmdArguments.get(0);
             allLoadedCmds.stream()
                 .filter(c -> c.getTrigger().equalsIgnoreCase(wantedHelpPage))
                 .findFirst()
+                .filter(cmd -> cmd.userHasEnoughPermission(msg))
                 .map(Command::fullHelpPage)
                 .ifPresent(helpPage -> msg.getChannel().sendMessage(helpPage).submit());
-            }
+        }
     }
+    
+    @Override
+    public MessageEmbed fullHelpPage() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public abstract String botDescription();
 
     @Override
     public Field getShortDescription() {
