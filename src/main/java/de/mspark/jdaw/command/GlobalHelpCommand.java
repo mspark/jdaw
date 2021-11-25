@@ -27,22 +27,22 @@ public abstract class GlobalHelpCommand extends Command {
             msg.getChannel().sendMessage(fullHelpPage()).submit();            
         } else {
             String wantedHelpPage = cmdArguments.get(0);
-            if (wantedHelpPage.equals("intro")) {
-                sendIntroduction(msg);
-            } else {
-                allLoadedCmds.stream()
-                    .filter(c -> c.getTrigger().equalsIgnoreCase(wantedHelpPage))
-                    .findFirst()
-                    .map(Command::fullHelpPage)
-                    .ifPresent(helpPage -> msg.getChannel().sendMessage(helpPage).submit());
+            allLoadedCmds.stream()
+                .filter(c -> c.getTrigger().equalsIgnoreCase(wantedHelpPage))
+                .findFirst()
+                .map(Command::fullHelpPage)
+                .ifPresent(helpPage -> msg.getChannel().sendMessage(helpPage).submit());
             }
-        }
     }
 
-    protected abstract void sendIntroduction(Message msg);
-    
     @Override
     public Field getShortDescription() {
         throw new UnsupportedOperationException();
     }
+    
+    @Override
+    public final String getTrigger() {
+        return "help";
+    }
+    
 }
