@@ -1,6 +1,6 @@
 package de.mspark.jdaw.command;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import de.mspark.jdaw.jda.JDAManager;
 import de.mspark.jdaw.jda.JDAWConfig;
@@ -29,7 +29,7 @@ public abstract class TextListener extends ListenerAdapter {
     }
     
     private boolean isChannelAllowed(String cid) {
-        return conf.channelWhitelist().length > 0 || Stream.of(conf.channelWhitelist()).toList().contains(cid);
+        return conf.channelWhitelist().length == 0 || List.of(conf.channelWhitelist()).contains(cid);
     }
 
     public abstract void onTextMessageReceived(MessageReceivedEvent event);
