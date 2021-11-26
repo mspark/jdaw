@@ -1,6 +1,5 @@
 
-JDAW is a wrapper for dv8tion-JDA with spring. It tries to simplify the development of independent commands. JDAW also supports multiple discord tokens at once. 
-
+JDAW provides a infrastructure for easy command development with dv8tion-JDA and spring. It simplify the development of independent commands with multiple discord tokens (also called "Powerups").
 
 You need at least one configured bot token. When giving multiple bot token, the first one in the list is always the "main" bot. 
 
@@ -21,7 +20,7 @@ The Config command will be available as spring bean as well. Every command is ex
 ### Global Help Command
 The global help command creates a help page for all command implementations and a short description of the whole application as well.
 
-In order to acitivate the help command, implement the `GlobalHelpCommand` class with the `@HelpCmd` annotation. 
+In order to acitivate the help command, implement the `GlobalHelpCommand` class with the `@EnableHelpCommand` annotation. 
 
 ### Other Actions
 If you want to run additional actions on any other configured bot, you can use the `JDAManager` inside a command implementation.  
@@ -33,7 +32,7 @@ In order to start the application the spring components from JDAW must be found 
 ```java
 @SpringBootApplication
 @ConfigurationPropertiesScan({"own.package"})
-@ComponentScan({"de.mspark.jdaw.jda", "own.package"})
+@ComponentScan({"de.mspark.jdaw", "own.package"})
 public class Application {
 
     public static void main(String[] args) {
