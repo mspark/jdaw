@@ -89,6 +89,8 @@ public JDAConfigurationVisitor jdaConfigurationVisitor() {
 }
 ```
 
+An example can be found [here](https://github.com/mspark/example-jdaw)
+
 ### Use the project
 ```
 <dependencies>
@@ -102,3 +104,4 @@ public JDAConfigurationVisitor jdaConfigurationVisitor() {
 ```
 
 In order to use github packages, you need to configure your maven according to the offical [github documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token).
+
