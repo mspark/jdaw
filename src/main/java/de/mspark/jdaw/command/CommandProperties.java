@@ -27,6 +27,10 @@ public @interface CommandProperties {
     String trigger();
     
     boolean executableWihtoutArgs() default false;
+    
+    String description();
+    
+    boolean helpPage() default true;
 
 //    String[] aliases() default {};
 }

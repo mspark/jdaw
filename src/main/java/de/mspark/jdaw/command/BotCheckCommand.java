@@ -12,9 +12,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 
-@CommandProperties(trigger = "botcheck", botGuildPermissions = Permission.MANAGE_SERVER, executableWihtoutArgs = true)
+@CommandProperties(
+    trigger = "botcheck", description = "Check bot availability on this guild",
+    botGuildPermissions = Permission.MANAGE_SERVER, executableWihtoutArgs = true)
 public class BotCheckCommand extends Command {
 
     private static class BotGuilds {
@@ -44,11 +45,6 @@ public class BotCheckCommand extends Command {
     @Override
     public MessageEmbed fullHelpPage() {
         return new EmbedBuilder().setDescription("No help page for this").build();
-    }
-
-    @Override
-    public Field getShortDescription() {
-        return new Field("botcheck [Admin view only]", "Check bot availability on this guild.", false);
     }
 
     public void checkPowerUps(Message msg) {

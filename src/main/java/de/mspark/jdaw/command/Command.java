@@ -3,6 +3,7 @@ package de.mspark.jdaw.command;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import de.mspark.jdaw.jda.JDAManager;
@@ -12,7 +13,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
@@ -57,13 +57,13 @@ public abstract class Command extends TextListener {
      *            when no arguments were given.
      */
     public abstract void doActionOnCmd(Message msg, List<String> cmdArguments);
-    
+
     /**
-     * Help page for this command with all subcommands. 
+     * Help page for the command (typically explains all sub-commands). 
      * 
      * @return
      */
-    public abstract MessageEmbed fullHelpPage();
+    protected abstract MessageEmbed fullHelpPage();
    
     /**
      * A short description what this command is for. It is shown in the global command overview inside a big message
@@ -71,11 +71,13 @@ public abstract class Command extends TextListener {
      * 
      * @return
      */
-    public abstract Field getShortDescription();
+    public String getShortDescription() {
+        return commandProperties.helpPage() ? commandProperties.description() : null;
+    }
     
 
     @Override
-    public void onTextMessageReceived(MessageReceivedEvent event) {
+    public final void onTextMessageReceived(MessageReceivedEvent event) {
         var arguments = getCmdArguments(event.getMessage());
         if (matchesTrigger(event.getMessage())) {
             arguments.remove(0);
@@ -116,7 +118,7 @@ public abstract class Command extends TextListener {
         }
     }
 
-    protected List<String> getCmdArguments(Message msg) {
+    protected final List<String> getCmdArguments(Message msg) {
         String[] arguments = msg.getContentRaw().split("\\s+");
         if (arguments.length > 0 && arguments[0].startsWith(conf.prefix())) {
             arguments[0] = arguments[0].substring(1);
@@ -130,9 +132,19 @@ public abstract class Command extends TextListener {
         return neededPermList;
     }
     
-    public boolean userHasEnoughPermission(Message context) {
+    public final boolean userHasEnoughPermission(Message context) {
         var memberPerm = context.getMember().getPermissions();
         var missingPerms = extractMissingPermission(commandProperties.userGuildPermissions(), memberPerm);
         return missingPerms.isEmpty();
     }
+    
+    
+    public final Optional<MessageEmbed> helpPage() {
+        if (commandProperties.helpPage()) {
+            return Optional.ofNullable(fullHelpPage());
+        } else {
+            return Optional.empty();
+        }
+    }
+    
 }
