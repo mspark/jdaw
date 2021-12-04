@@ -1,9 +1,11 @@
-package de.mspark.jdaw.command;
+package de.mspark.jdaw.command.utils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.mspark.jdaw.command.Command;
+import de.mspark.jdaw.command.CommandProperties;
 import de.mspark.jdaw.jda.JDAManager;
 import de.mspark.jdaw.jda.JDAWConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
