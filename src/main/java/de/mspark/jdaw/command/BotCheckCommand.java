@@ -15,7 +15,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 
 @CommandProperties(
     trigger = "botcheck", description = "Check bot availability on this guild",
-    botGuildPermissions = Permission.MANAGE_SERVER, executableWihtoutArgs = true)
+    userGuildPermissions = Permission.MANAGE_SERVER, 
+    executableWihtoutArgs = true)
 public class BotCheckCommand extends Command {
 
     private static class BotGuilds {

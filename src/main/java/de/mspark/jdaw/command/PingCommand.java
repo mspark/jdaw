@@ -7,7 +7,7 @@ import de.mspark.jdaw.jda.JDAWConfig;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-@CommandProperties(trigger = "ping", description = "Replies with pong", helpPage = false)
+@CommandProperties(trigger = "ping", description = "Replies with pong", helpPage = false, executableWihtoutArgs = true)
 public class PingCommand extends Command {
 
     public PingCommand(JDAWConfig conf, JDAManager jdas) {
@@ -16,7 +16,7 @@ public class PingCommand extends Command {
 
     @Override
     public void doActionOnCmd(Message msg, List<String> cmdArguments) {
-        msg.reply("pong");
+        msg.reply("pong").submit();
     }
 
     @Override
