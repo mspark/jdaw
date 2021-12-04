@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
@@ -113,12 +114,19 @@ public abstract class Command extends TextListener {
             var embed = new EmbedBuilder().setDescription("❌ Missing Permission:\n");
             missingUserPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
             event.getChannel().sendMessage(embed.build()).submit();
+            return;
         }
         if (!missingBotPerm.isEmpty()) {
             var embed = new EmbedBuilder().setDescription("The bot needs the following permissions in order to execute the command:\n");
             missingBotPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
             event.getChannel().sendMessage(embed.build()).submit();
-        } else if (enoughArguments){
+            return; 
+        } 
+        if (!globalBotAdminCheck(event.getAuthor())) {
+            event.getAuthor().openPrivateChannel().complete().sendMessage("You are not allowed to invoke this command").submit();
+            return;
+        }
+        if (enoughArguments){
             doActionOnCmd(event.getMessage(), arguments);
         } else {
             event.getChannel().sendMessage("Zu wenig Argumente!. Benutze den help befehl").submit();
@@ -138,13 +146,20 @@ public abstract class Command extends TextListener {
         neededPermList.removeAll(givenPermissions);
         return neededPermList;
     }
-    
+
     public final boolean userHasEnoughPermission(Message context) {
         var memberPerm = context.getMember().getPermissions();
         var missingPerms = extractMissingPermission(commandProperties.userGuildPermissions(), memberPerm);
-        return missingPerms.isEmpty();
+        
+        return missingPerms.isEmpty() && globalBotAdminCheck(context.getAuthor());
     }
-    
+
+    private boolean globalBotAdminCheck(User u) {
+        if (commandProperties.botAdminOnly()) {
+            return Arrays.stream(conf.botAdmins()).anyMatch(ba -> ba.equals(u.getId()));
+        } 
+        return true;
+    }
     
     public final Optional<MessageEmbed> helpPage() {
         if (commandProperties.helpPage()) {

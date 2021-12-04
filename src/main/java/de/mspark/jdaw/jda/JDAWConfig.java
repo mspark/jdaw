@@ -1,5 +1,6 @@
 package de.mspark.jdaw.jda;
 
+import de.mspark.jdaw.command.CommandProperties;
 
 /** 
  * Provides basic information in order to run JDAW. Must be implemented and then scanned by spring. For example
@@ -37,6 +38,16 @@ public interface JDAWConfig {
      * @return
      */
     default String[] channelWhitelist() {
+        return new String[0];
+    }
+    
+    /**
+     * Specifies users which are bot admins. This can be used for commands which aren't specific to guilds like "restart"
+     * or "reload config". See {@link CommandProperties#botAdminOnly()} setting for enabling the botAdmin check inside a
+     * command. 
+     * @return List of User IDs
+     */
+    default String[] botAdmins() {
         return new String[0];
     }
 }

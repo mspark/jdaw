@@ -32,6 +32,12 @@ public @interface CommandProperties {
 
     String[] aliases() default {};
     
+    /**
+     * Determines if the command should only be invoked by a global bot administrator.
+     * @return
+     */
+    boolean botAdminOnly() default false;
+    
     boolean executableWihtoutArgs() default false;
     
     String description();
