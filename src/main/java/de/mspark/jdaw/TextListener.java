@@ -1,9 +1,8 @@
-package de.mspark.jdaw.command;
+package de.mspark.jdaw;
 
 import java.util.List;
 
-import de.mspark.jdaw.jda.JDAManager;
-import de.mspark.jdaw.jda.JDAWConfig;
+import de.mspark.jdaw.config.JDAWConfig;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

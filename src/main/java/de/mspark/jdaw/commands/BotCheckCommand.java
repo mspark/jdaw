@@ -1,13 +1,13 @@
-package de.mspark.jdaw.command.utils;
+package de.mspark.jdaw.commands;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.mspark.jdaw.command.Command;
-import de.mspark.jdaw.command.CommandProperties;
-import de.mspark.jdaw.jda.JDAManager;
-import de.mspark.jdaw.jda.JDAWConfig;
+import de.mspark.jdaw.Command;
+import de.mspark.jdaw.CommandProperties;
+import de.mspark.jdaw.JDAManager;
+import de.mspark.jdaw.config.JDAWConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;

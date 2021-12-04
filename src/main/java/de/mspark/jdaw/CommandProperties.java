@@ -1,4 +1,4 @@
-package de.mspark.jdaw.command;
+package de.mspark.jdaw;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

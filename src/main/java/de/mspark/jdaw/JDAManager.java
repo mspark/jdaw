@@ -1,4 +1,4 @@
-package de.mspark.jdaw.jda;
+package de.mspark.jdaw;
 
 import net.dv8tion.jda.api.JDA;
 

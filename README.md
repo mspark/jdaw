@@ -97,7 +97,7 @@ An example can be found [here](https://github.com/mspark/example-jdaw)
   <dependency>
     <groupId>de.mspark.de</groupId>
     <artifactId>jdaw</artifactId>
-    <version>1.2</version>
+    <version>2.2</version>
   </dependency>
 </dependencies>
 

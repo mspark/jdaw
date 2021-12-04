@@ -1,4 +1,4 @@
-package de.mspark.jdaw.jda;
+package de.mspark.jdaw.config;
 
 import java.util.List;
 import java.util.stream.Stream;

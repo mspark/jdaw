@@ -1,9 +1,10 @@
-package de.mspark.jdaw.command;
+package de.mspark.jdaw.help;
 
 import java.util.List;
 
-import de.mspark.jdaw.jda.JDAManager;
-import de.mspark.jdaw.jda.JDAWConfig;
+import de.mspark.jdaw.Command;
+import de.mspark.jdaw.JDAManager;
+import de.mspark.jdaw.config.JDAWConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;

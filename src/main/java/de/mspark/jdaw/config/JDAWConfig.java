@@ -1,6 +1,6 @@
-package de.mspark.jdaw.jda;
+package de.mspark.jdaw.config;
 
-import de.mspark.jdaw.command.CommandProperties;
+import de.mspark.jdaw.CommandProperties;
 
 /** 
  * Provides basic information in order to run JDAW. Must be implemented and then scanned by spring. For example
