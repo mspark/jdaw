@@ -24,7 +24,13 @@ public @interface CommandProperties {
      */
     Permission[] userGuildPermissions() default {};
     
+    /**
+     * Main trigger. It is mandatory and is used for help page generatin
+     * @return
+     */
     String trigger();
+
+    String[] aliases() default {};
     
     boolean executableWihtoutArgs() default false;
     

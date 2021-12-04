@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.mspark.jdaw.jda.JDAManager;
 import de.mspark.jdaw.jda.JDAWConfig;
@@ -40,8 +41,8 @@ public abstract class Command extends TextListener {
         super(conf, jdas, balance);
         var annotation = this.getClass().getAnnotation(CommandProperties.class);
         if (annotation == null) {
-            var tsadas = this.getClass().getAnnotation(EnableHelpCommand.class);
-            annotation = tsadas.annotationType().getDeclaredAnnotation(CommandProperties.class);
+            var helpAnnontation = this.getClass().getAnnotation(EnableHelpCommand.class);
+            annotation = helpAnnontation.annotationType().getDeclaredAnnotation(CommandProperties.class);
             if (annotation == null) {
                 throw new Error("No annotation with properties found. Fix this and rebuild application");
             }
@@ -89,11 +90,17 @@ public abstract class Command extends TextListener {
         var arguments = getCmdArguments(msg);
         if (arguments.isEmpty()) return false;
         var cmd = arguments.get(0);
-        return cmd.equalsIgnoreCase(getTrigger());
+        var allTrigger = new ArrayList<>(Arrays.asList(getAliases()));
+        allTrigger.add(getTrigger());
+        return allTrigger.stream().filter(t -> cmd.equalsIgnoreCase(t)).findAny().isPresent();
     }
     
     public String getTrigger() {
         return commandProperties.trigger();
+    }
+    
+    public String[] getAliases() {
+        return commandProperties.aliases();
     }
 
     private void invoke(MessageReceivedEvent event, List<String> arguments) {
@@ -141,7 +148,14 @@ public abstract class Command extends TextListener {
     
     public final Optional<MessageEmbed> helpPage() {
         if (commandProperties.helpPage()) {
-            return Optional.ofNullable(fullHelpPage());
+            MessageEmbed embed;
+            if (getAliases().length > 0) {
+                String aliasAppendix = Arrays.stream(getAliases()).map(a -> conf.prefix() + a).collect(Collectors.joining(", "));
+                embed = new EmbedBuilder(fullHelpPage()).appendDescription("\n\n *Aliases: " + aliasAppendix + "*").build();
+            } else {
+                embed = fullHelpPage();
+            }
+            return Optional.ofNullable(embed);
         } else {
             return Optional.empty();
         }
