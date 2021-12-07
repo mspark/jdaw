@@ -26,7 +26,7 @@ public abstract class GlobalHelpCommand extends Command {
     @Override
     public void doActionOnCmd(Message msg, List<String> cmdArguments) {
         if (cmdArguments.isEmpty()) {
-            var eb = new EmbedBuilder().setDescription(botDescription());
+            var eb = new EmbedBuilder().setTitle(botName()).setDescription(botDescription());
             allLoadedCmds.stream()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
                 .filter(cmd -> cmd.helpPage().isPresent())
@@ -52,6 +52,8 @@ public abstract class GlobalHelpCommand extends Command {
     }
     
     public abstract String botDescription();
+    
+    public abstract String botName();
 
     @Override
     public String getShortDescription() {
