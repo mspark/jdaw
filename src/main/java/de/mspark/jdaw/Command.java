@@ -61,9 +61,9 @@ public abstract class Command extends TextListener {
     public abstract void doActionOnCmd(Message msg, List<String> cmdArguments);
 
     /**
-     * Help page for the command (typically explains all sub-commands). 
+     * Help page for the command (typically explains all sub-commands). All command aliases are appended at the end. 
      * 
-     * @return
+     * @return Is allowed to be <code>null</code> when {@link CommandProperties#helpPage()} is set to false
      */
     protected abstract MessageEmbed fullHelpPage();
    
@@ -163,14 +163,14 @@ public abstract class Command extends TextListener {
     
     public final Optional<MessageEmbed> helpPage() {
         if (commandProperties.helpPage()) {
-            MessageEmbed embed;
+            var embed = Optional.of(fullHelpPage());
             if (getAliases().length > 0) {
                 String aliasAppendix = Arrays.stream(getAliases()).map(a -> conf.prefix() + a).collect(Collectors.joining(", "));
-                embed = new EmbedBuilder(fullHelpPage()).appendDescription("\n\n *Aliases: " + aliasAppendix + "*").build();
-            } else {
-                embed = fullHelpPage();
+                embed = Optional.of(
+                        new EmbedBuilder(embed.orElseThrow()).appendDescription("\n\n *Aliases: " + aliasAppendix + "*").build()
+                    );
             }
-            return Optional.ofNullable(embed);
+            return embed;
         } else {
             return Optional.empty();
         }
