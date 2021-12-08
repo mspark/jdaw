@@ -11,6 +11,7 @@ import de.mspark.jdaw.config.JDAWConfig;
 import de.mspark.jdaw.help.EnableHelpCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -77,6 +78,10 @@ public abstract class Command extends TextListener {
         return commandProperties.helpPage() ? commandProperties.description() : null;
     }
     
+    @Override
+    public boolean isPrivateChatAllowed() {
+        return commandProperties.privateChatAllowed();
+    }
 
     @Override
     public final void onTextMessageReceived(MessageReceivedEvent event) {
@@ -105,7 +110,27 @@ public abstract class Command extends TextListener {
     }
 
     private void invoke(MessageReceivedEvent event, List<String> arguments) {
+        if (!globalBotAdminCheck(event.getAuthor())) {
+            event.getAuthor().openPrivateChannel().complete().sendMessage("You are not allowed to invoke this command").submit();
+            return;
+        }
+        if (event.isFromType(ChannelType.PRIVATE)) {
+            invokeWithArguments(event, arguments);            
+        } else if (permissionCheck(event)) {
+            invokeWithArguments(event, arguments);
+        }
+    }
+
+    private void invokeWithArguments(MessageReceivedEvent event, List<String> arguments) {
         boolean enoughArguments = commandProperties.executableWihtoutArgs() || arguments.size() >= 1;
+        if (enoughArguments){
+            doActionOnCmd(event.getMessage(), arguments);
+        } else {
+            event.getChannel().sendMessage("Zu wenig Argumente!. Benutze den help befehl").submit();
+        }
+    }
+
+    private boolean permissionCheck(MessageReceivedEvent event) {
         var missingUserPerm = extractMissingPermission(commandProperties.userGuildPermissions(), event.getMember().getPermissions());
         Member ownUser = event.getGuild().getSelfMember();
         var missingBotPerm = extractMissingPermission(commandProperties.botGuildPermissions(), ownUser.getPermissions());
@@ -114,23 +139,15 @@ public abstract class Command extends TextListener {
             var embed = new EmbedBuilder().setDescription("❌ Missing Permission:\n");
             missingUserPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
             event.getChannel().sendMessage(embed.build()).submit();
-            return;
+            return false;
         }
         if (!missingBotPerm.isEmpty()) {
             var embed = new EmbedBuilder().setDescription("The bot needs the following permissions in order to execute the command:\n");
             missingBotPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
             event.getChannel().sendMessage(embed.build()).submit();
-            return; 
-        } 
-        if (!globalBotAdminCheck(event.getAuthor())) {
-            event.getAuthor().openPrivateChannel().complete().sendMessage("You are not allowed to invoke this command").submit();
-            return;
+            return false; 
         }
-        if (enoughArguments){
-            doActionOnCmd(event.getMessage(), arguments);
-        } else {
-            event.getChannel().sendMessage("Zu wenig Argumente!. Benutze den help befehl").submit();
-        }
+        return true;
     }
 
     protected final List<String> getCmdArguments(Message msg) {

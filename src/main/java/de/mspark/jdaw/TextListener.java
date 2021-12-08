@@ -21,8 +21,7 @@ public abstract class TextListener extends ListenerAdapter {
     
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if (event.isFromType(ChannelType.TEXT)
-                && isChannelAllowed(event.getChannel().getId())) {
+        if (checkAllowedScope(event)) {
             onTextMessageReceived(event);
         }
     }
@@ -30,8 +29,15 @@ public abstract class TextListener extends ListenerAdapter {
     private boolean isChannelAllowed(String cid) {
         return conf.channelWhitelist().length == 0 || List.of(conf.channelWhitelist()).contains(cid);
     }
-
-    public abstract void onTextMessageReceived(MessageReceivedEvent event);
     
+    private boolean checkAllowedScope(MessageReceivedEvent event) {
+        if (event.isFromType(ChannelType.PRIVATE)) {
+            return isPrivateChatAllowed();
+        } else {
+            return event.isFromType(ChannelType.TEXT) && isChannelAllowed(event.getChannel().getId());
+        }
+    }
 
+    public abstract boolean isPrivateChatAllowed();
+    public abstract void onTextMessageReceived(MessageReceivedEvent event);
 }

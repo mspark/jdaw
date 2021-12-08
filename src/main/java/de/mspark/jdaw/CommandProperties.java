@@ -25,7 +25,7 @@ public @interface CommandProperties {
     Permission[] userGuildPermissions() default {};
     
     /**
-     * Main trigger. It is mandatory and is used for help page generatin
+     * Main trigger. It is mandatory and is used for help page generation.
      * @return
      */
     String trigger();
@@ -44,5 +44,11 @@ public @interface CommandProperties {
     
     boolean helpPage() default true;
 
-//    String[] aliases() default {};
+    /**
+     * Specifies if this command can be executed inside a private chat with the bot (typically this is the case when a command
+     * isn't specific to a guild like restart commands).
+     * @return
+     */
+    boolean privateChatAllowed() default false;
+    
 }
