@@ -34,14 +34,6 @@ public interface JDAWConfig {
     String[] apiTokens();
     
     /**
-     * List of allowed channels (IDs) where the bot-commands can be used. Allow all when empty.
-     * @return
-     */
-    default String[] channelWhitelist() {
-        return new String[0];
-    }
-    
-    /**
      * Specifies users which are bot admins. This can be used for commands which aren't specific to guilds like "restart"
      * or "reload config". See {@link CommandProperties#botAdminOnly()} setting for enabling the botAdmin check inside a
      * command. 

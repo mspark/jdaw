@@ -1,17 +1,15 @@
 package de.mspark.jdaw;
 
-import java.util.List;
-
-import de.mspark.jdaw.config.JDAWConfig;
+import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public abstract class TextListener extends ListenerAdapter {
-    protected final JDAWConfig conf;
+    protected final GuildConfigService guildConfig;
     
-    public TextListener(JDAWConfig conf, JDAManager jdas, boolean balance) {
-        this.conf = conf;
+    public TextListener(GuildConfigService guildConfig, JDAManager jdas, boolean balance) {
+        this.guildConfig = guildConfig;
         if (balance) {
             jdas.getNextJDA().addEventListener(this);            
         } else {
@@ -26,16 +24,19 @@ public abstract class TextListener extends ListenerAdapter {
         }
     }
     
-    private boolean isChannelAllowed(String cid) {
-        return conf.channelWhitelist().length == 0 || List.of(conf.channelWhitelist()).contains(cid);
-    }
-    
     private boolean checkAllowedScope(MessageReceivedEvent event) {
         if (event.isFromType(ChannelType.PRIVATE)) {
             return isPrivateChatAllowed();
         } else {
-            return event.isFromType(ChannelType.TEXT) && isChannelAllowed(event.getChannel().getId());
+            return event.isFromType(ChannelType.TEXT) && isChannelAllowed(event);
         }
+    }
+    
+    
+
+    private boolean isChannelAllowed(MessageReceivedEvent event) {
+        var whitelist = guildConfig.getWhitelistChannel(event);
+        return whitelist.isEmpty() || whitelist.contains(event.getChannel().getId());
     }
 
     public abstract boolean isPrivateChatAllowed();

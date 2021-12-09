@@ -5,6 +5,7 @@ import java.util.List;
 import de.mspark.jdaw.Command;
 import de.mspark.jdaw.JDAManager;
 import de.mspark.jdaw.config.JDAWConfig;
+import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -18,8 +19,8 @@ public abstract class GlobalHelpCommand extends Command {
     
     protected List<Command> allLoadedCmds; 
     
-    public GlobalHelpCommand(JDAWConfig conf, JDAManager jdas, List<Command> allLoadedCmds) {
-        super(conf, jdas);
+    public GlobalHelpCommand(JDAWConfig conf, GuildConfigService gc, JDAManager jdas, List<Command> allLoadedCmds) {
+        super(conf, gc, jdas, false);
         this.allLoadedCmds = allLoadedCmds;
     }
 
@@ -29,7 +30,7 @@ public abstract class GlobalHelpCommand extends Command {
             var eb = new EmbedBuilder().setTitle(botName()).setDescription(botDescription());
             allLoadedCmds.stream()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
-                .filter(cmd -> cmd.helpPage().isPresent())
+                .filter(cmd -> cmd.helpPage(msg).isPresent())
                 .forEach(cmd -> eb.addField(cmd.getTrigger(), cmd.getShortDescription(), false));
             msg.getChannel().sendMessage(eb.build()).submit();
         } else {
@@ -38,7 +39,7 @@ public abstract class GlobalHelpCommand extends Command {
                 .filter(c -> c.getTrigger().equalsIgnoreCase(wantedHelpPage))
                 .findFirst()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
-                .flatMap(Command::helpPage)
+                .flatMap(c -> c.helpPage(msg))
                 .ifPresentOrElse(
                         helpPage -> msg.getChannel().sendMessage(helpPage).submit(), 
                         () -> msg.reply("No help page").submit()

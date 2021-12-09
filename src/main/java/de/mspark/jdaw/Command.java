@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.mspark.jdaw.config.JDAWConfig;
+import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.help.EnableHelpCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -25,22 +26,23 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
  * @author marcel
  */
 public abstract class Command extends TextListener {
-    private CommandProperties commandProperties;
-    
-    public Command(JDAWConfig conf, JDAManager jdas) {
-        this(conf, jdas, false);
-    }
+    private final CommandProperties commandProperties;
+    private GuildConfigService guildConfig;
+    private final JDAWConfig config;
     
     /**
      * Defines a command. {@link CommandProperties} is necessary to define properties. 
      * 
      * @param conf
+     * @param guilConfig
      * @param jdas
      * @param balance When true, the command is executed (and listens) on any configured discord bot otherwise its 
      *        always the main bot
      */
-    public Command(JDAWConfig conf, JDAManager jdas, boolean balance) {
-        super(conf, jdas, balance);
+    public Command(JDAWConfig config, GuildConfigService guildConfig, JDAManager jdas, boolean balance) {
+        super(guildConfig, jdas, balance);
+        this.guildConfig = guildConfig;
+        this.config = config;
         var annotation = this.getClass().getAnnotation(CommandProperties.class);
         if (annotation == null) {
             var helpAnnontation = this.getClass().getAnnotation(EnableHelpCommand.class);
@@ -152,7 +154,8 @@ public abstract class Command extends TextListener {
 
     protected final List<String> getCmdArguments(Message msg) {
         String[] arguments = msg.getContentRaw().split("\\s+");
-        if (arguments.length > 0 && arguments[0].startsWith(conf.prefix())) {
+        String prefix = guildConfig.getPrefix(msg);
+        if (arguments.length > 0 && arguments[0].startsWith(prefix)) {
             arguments[0] = arguments[0].substring(1);
         }
         return new ArrayList<String>(Arrays.asList(arguments));
@@ -173,12 +176,12 @@ public abstract class Command extends TextListener {
 
     private boolean globalBotAdminCheck(User u) {
         if (commandProperties.botAdminOnly()) {
-            return Arrays.stream(conf.botAdmins()).anyMatch(ba -> ba.equals(u.getId()));
+            return Arrays.stream(config.botAdmins()).anyMatch(ba -> ba.equals(u.getId()));
         } 
         return true;
     }
     
-    public final Optional<MessageEmbed> helpPage() {
+    public final Optional<MessageEmbed> helpPage(Message msg) {
         Optional<MessageEmbed> opt = Optional.empty();
         if (commandProperties.helpPage()) {
             var embed = fullHelpPage();
@@ -186,8 +189,9 @@ public abstract class Command extends TextListener {
                 List<String> allTrigger = new ArrayList<String>();
                 allTrigger.add(getTrigger());
                 allTrigger.addAll(List.of(getAliases()));
+                String prefix = guildConfig.getPrefix(msg);
                 String aliasAppendix = allTrigger.stream()
-                        .map(a -> conf.prefix() + a)
+                        .map(a -> prefix + a)
                         .collect(Collectors.joining(", "));
                 embed = new EmbedBuilder(embed).setFooter("Aliases: " + aliasAppendix).build();
             }
