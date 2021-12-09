@@ -179,18 +179,21 @@ public abstract class Command extends TextListener {
     }
     
     public final Optional<MessageEmbed> helpPage() {
+        Optional<MessageEmbed> opt = Optional.empty();
         if (commandProperties.helpPage()) {
-            var embed = Optional.of(fullHelpPage());
+            var embed = fullHelpPage();
             if (getAliases().length > 0) {
-                String aliasAppendix = Arrays.stream(getAliases()).map(a -> conf.prefix() + a).collect(Collectors.joining(", "));
-                embed = Optional.of(
-                        new EmbedBuilder(embed.orElseThrow()).appendDescription("\n\n *Aliases: " + aliasAppendix + "*").build()
-                    );
+                List<String> allTrigger = new ArrayList<String>();
+                allTrigger.add(getTrigger());
+                allTrigger.addAll(List.of(getAliases()));
+                String aliasAppendix = allTrigger.stream()
+                        .map(a -> conf.prefix() + a)
+                        .collect(Collectors.joining(", "));
+                embed = new EmbedBuilder(embed).setFooter("Aliases: " + aliasAppendix).build();
             }
-            return embed;
-        } else {
-            return Optional.empty();
+            opt = Optional.of(embed);
         }
+        return opt;
     }
     
 }
