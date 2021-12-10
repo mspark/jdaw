@@ -15,7 +15,7 @@ public class ConfigCommand extends Command {....}
 
 ```
 
-The Config command will be available as spring bean as well. Every command is executed on by the main bot. This behaviour is configurable. 
+The Config command will be available as spring bean as well. The constructor let you define an option where the bot should be run on (the main bot or if it gets "balanced" over all available ones). Although the CommandProperties annotation gives you a lot of options to customize your command. Since this is a spring component, you can use dependency injection here for the necessary beans in the constructor.  
 
 ### Global Help Command
 The global help command creates a help page for all command implementations and a short description of the whole application as well.
@@ -65,11 +65,6 @@ public JDAWConfig jdawConfig() {
         public String prefix() {
             return "$";
         }
-            
-        @Override
-        public String[] channelWhitelist() {
-            return new String []{ "", "" /* ids here */ };
-        }
        
         @Override
         public String[] apiTokens() {
@@ -91,13 +86,18 @@ public JDAConfigurationVisitor jdaConfigurationVisitor() {
 
 An example can be found [here](https://github.com/mspark/example-jdaw)
 
+### Mutli Guild usage
+If your bots needs to run on different guilds on the same time with different guilds, you can enable the multi guild support by providing a `GuildRepository` bean with the `@Primary`annotation. Through that, every guild can have its own prefix and channel whitelist. 
+
+To get the guild specific prefix, use the `GuildConfigService` to receive it. When a guild has no custom settings, the global ones are used. So its save to use it all the time event without multi guild support enabled. 
+
 ### Use the project
 ```
 <dependencies>
   <dependency>
     <groupId>de.mspark.de</groupId>
     <artifactId>jdaw</artifactId>
-    <version>2.2</version>
+    <version>3.0</version>
   </dependency>
 </dependencies>
 

@@ -8,6 +8,7 @@ import de.mspark.jdaw.Command;
 import de.mspark.jdaw.CommandProperties;
 import de.mspark.jdaw.JDAManager;
 import de.mspark.jdaw.config.JDAWConfig;
+import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -35,8 +36,8 @@ public class BotCheckCommand extends Command {
 
     private JDA[] allBots;
 
-    public BotCheckCommand(JDAWConfig conf, JDAManager jdas, JDA[] allJDA) {
-        super(conf, jdas);
+    public BotCheckCommand(JDAWConfig conf, GuildConfigService guilConfig, JDAManager jdas, JDA[] allJDA) {
+        super(conf, guilConfig, jdas, false);
         this.allBots = allJDA;
     }
 
