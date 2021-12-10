@@ -1,20 +1,24 @@
 package de.mspark.jdaw.guilds.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Entity
+
 public class CustomGuildConf {
-    @Id
-    long id;
-    String prefix;
-    String[] whitelist;
+    private long id;
+    private String prefix;
+    private String whitelist;
 
-    public CustomGuildConf(long id, String prefix, String[] whitelist) {
+    public CustomGuildConf(long id, String prefix, List<String> whitelist) {
         super();
         this.id = id;
         this.prefix = prefix;
-        this.whitelist = whitelist;
+        this.whitelist = whitelist.stream().collect(Collectors.joining(","));
+    }
+    
+    public CustomGuildConf(long id, String prefix) {
+        this(id, prefix, Collections.emptyList());
     }
 
     public long id() {
@@ -33,12 +37,12 @@ public class CustomGuildConf {
         this.prefix = prefix;
     }
 
-    public String[] whitelist() {
-        return whitelist;
-    }
-
-    public void setWhitelist(String[] whitelist) {
-        this.whitelist = whitelist;
+    public List<String> whitelist() {
+        String[] whitelist = this.whitelist.split(",");
+        if (whitelist.length > 0 && !whitelist[0].isBlank()) {
+            return List.of(whitelist);
+        } 
+        return Collections.emptyList();
     }
 
 }

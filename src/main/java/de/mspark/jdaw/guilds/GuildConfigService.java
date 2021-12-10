@@ -39,7 +39,7 @@ public class GuildConfigService {
     public <T extends GenericMessageEvent> List<String> getWhitelistChannel(T event) {
         return getGuild(event)
                 .flatMap(g -> repo.findOne(g.getIdLong()))
-                .map(cg -> cg.whitelist()).map(List::of)
+                .map(cg -> cg.whitelist())
                 .orElseGet(Collections::emptyList);
     }
 }
