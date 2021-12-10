@@ -4,8 +4,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
+@Entity
 public class CustomGuildConf {
+	@Id
     private long id;
     private String prefix;
     private String whitelist;

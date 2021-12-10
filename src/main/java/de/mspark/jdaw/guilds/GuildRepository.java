@@ -6,7 +6,7 @@ import de.mspark.jdaw.guilds.model.CustomGuildConf;
 
 public interface GuildRepository {
     
-    public CustomGuildConf save(CustomGuildConf g);
+    CustomGuildConf save(CustomGuildConf g);
     
     void delete(CustomGuildConf entity);
     
