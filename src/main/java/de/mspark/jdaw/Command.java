@@ -195,7 +195,7 @@ public abstract class Command extends TextListener {
                         .collect(Collectors.joining(", "));
                 embed = new EmbedBuilder(embed).setFooter("Aliases: " + aliasAppendix).build();
             }
-            opt = Optional.of(embed);
+            opt = Optional.ofNullable(embed);
         }
         return opt;
     }
