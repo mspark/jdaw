@@ -1,37 +1,56 @@
 
-JDAW provides a infrastructure for easy command development with dv8tion-JDA and spring. It simplify the development of independent commands with multiple discord tokens (also called "Powerups").
+This project tries to provide an infrastructure for an easy and fast discord bot development. It is a library which provides a set of "standard" features which can be found in many self written discord bots.
+
+This project uses [JDA](https://github.com/DV8FromTheWorld/JDA) (java discord api implementation) and the [Spring Framework](https://spring.io/projects/spring-framework). 
+
+
+It aims on simplifying the development of independent commands. It also has support for multiple bot tokens for balancing mechanisms.
 
 You need at least one configured bot token. When giving multiple bot token, the first one in the list is always the "main" bot. 
 
-### Commands
+# Features
+It's a goal to make command development easier. By using JDAW you can write new commands within seconds without implementing permission checks (user, guild and global) or trigger checks by yourself. Other features are:
 
+* [A global help command](../../wiki/Help-Command)
+* [Support for multiple discord tokens](../../Command-Balancing)
+* [Seperate guild configuration](../../wiki/Multiguild-Support) (different prefix per guild)
 
-A single Command can be written like:
+Work in progress:
+* Slash command support
+
+Look in the [wiki](../../wiki) for furthor explanations!
+An example discord bot which uses JDAW can be found in [this](https://github.com/mspark/example-jdaw) repository. 
+
+# Commands
+
+A single command is a spring bean and is provided when using the `@CommandProperties` annotation. A very simple command can look like this:
 
 ```java
+@CommandProperties(trigger = "test", description = "Demonstration of different JDA execution")
+public class BalanceTestCommand extends Command {
 
-@CommandProperties(trigger = "config", userGuildPermissions = Permission.ADMINISTRATOR)
-public class ConfigCommand extends Command {....}
+    @Override
+    public void doActionOnCmd(Message msg, List<String> cmdArguments) {}
+   // ....
+}
 
 ```
+The command is now executed when all of these conditions are met:
+* text starts with prefix (like `!`)
+* text starts with command trigger
+* user has enough permissions (you need to configure this)
+* bot has enough permissions
 
-The Config command will be available as spring bean as well. The constructor let you define an option where the bot should be run on (the main bot or if it gets "balanced" over all available ones). Although the CommandProperties annotation gives you a lot of options to customize your command. Since this is a spring component, you can use dependency injection here for the necessary beans in the constructor.  
+Further explanation with an example can be found [in the wiki](../../wiki/Writing-Commands). 
 
-### Global Help Command
-The global help command creates a help page for all command implementations and a short description of the whole application as well.
+# Setup
+**The easiest way to use JDAW is by using Spring-Boot** . The JDA configuration (discord login etc.) is done via bean configuration, thus you need to enable the `ComponentScan` on the package `de.mspark.jdaw`. If you don't want the default command you can exclude the package `de.mspark.jdaw.commands` (see [Preinstalled Commands](../../wiki/Preinstalled-Commands))
 
-In order to acitivate the help command, implement the `GlobalHelpCommand` class with the `@EnableHelpCommand` annotation. 
 
-### Other Actions
-If you want to run additional actions on any other configured bot, you can use the `JDAManager` inside a command implementation.  
-
-### Setup
-
-In order to start the application the spring components from JDAW must be found by spring. Enable the `ComponentScan`: 
+**Example for main class:**
 
 ```java
 @SpringBootApplication
-@ConfigurationPropertiesScan({"own.package"})
 @ComponentScan({"de.mspark.jdaw", "own.package"})
 public class Application {
 
@@ -40,21 +59,8 @@ public class Application {
     }
 }
 
-```
-In addition to that, you have to implement the `JDAWConfig` interface to configure your application.
-
-Loading from file:
-
-```java
-@ConstructorBinding /* Remove when updating to Spring 2.6 */
-@ConfigurationProperties(prefix = "bot")
-public record Config(
-	String prefix, 
-	String[] channelWhitelist, 
-	String[] apiTokens) implements JDAWConfig {}
-```
-
-Via Bean: 
+````
+In addition to that, you have to implement the `JDAWConfig` interface to configure your application. You can do this directly by providing a bean (or load it from your application.properties). 
 
 ```java
 @Bean
@@ -73,25 +79,37 @@ public JDAWConfig jdawConfig() {
     };
 }
 ```
-For modifying the JDA configuraiton, provide one or multiple beans of `JDAConfigurationVisitor`. Example for enable member caching:
 
-```java
-@Bean
-public JDAConfigurationVisitor jdaConfigurationVisitor() {
-    return jda -> jda.setChunkingFilter(ChunkingFilter.ALL)
-            .setMemberCachePolicy(MemberCachePolicy.ALL)
-            .enableIntents(GatewayIntent.GUILD_MEMBERS);
-}
+You can modify the JDA bot configuration by providing beans for `JDAConfigurationVisitor` too. Have a look at the [JDAW Configuration page](../../wiki/JDAW-Configuration) if you have need for this (when you want to cache members etc.). 
+
+# Use JDAW
+The JDAW package is not published in the maven central repository. Currently it is only available via github packages. In order to use this you need to configure your maven according to the offical [github documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token). In the end you need something like this in your `~/.m2/settings.xml`:
+
+```
+<repository>
+   <id>github</id>
+   <url>https://maven.pkg.github.com/mspark/jdaw</url>
+   <snapshots>
+       <enabled>true</enabled>
+   </snapshots>
+</repository>
 ```
 
-An example can be found [here](https://github.com/mspark/example-jdaw)
 
-### Mutli Guild usage
-If your bots needs to run on different guilds on the same time with different guilds, you can enable the multi guild support by providing a `GuildRepository` bean with the `@Primary`annotation. Through that, every guild can have its own prefix and channel whitelist. 
+In your project pom you need to add the distribution management: 
 
-To get the guild specific prefix, use the `GuildConfigService` to receive it. When a guild has no custom settings, the global ones are used. So its save to use it all the time event without multi guild support enabled. 
+```
+<distributionManagement>
+	<repository>
+		<id>github-jdaw</id>
+		<name>JDAW GitHub Packages</name>
+		<url>https://maven.pkg.github.com/mspark/jdaw</url>
+	</repository>
+</distributionManagement>
+```
 
-### Use the project
+Now you can add the dependency to JDAW.
+
 ```
 <dependencies>
   <dependency>
@@ -102,6 +120,4 @@ To get the guild specific prefix, use the `GuildConfigService` to receive it. Wh
 </dependencies>
 
 ```
-
-In order to use github packages, you need to configure your maven according to the offical [github documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token).
 
