@@ -32,7 +32,7 @@ public abstract class GlobalHelpCommand extends Command {
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
                 .filter(cmd -> cmd.helpPage(msg).isPresent())
                 .forEach(cmd -> eb.addField(cmd.getTrigger(), cmd.getShortDescription(), false));
-            msg.getChannel().sendMessage(eb.build()).submit();
+            msg.getChannel().sendMessageEmbeds(eb.build()).submit();
         } else {
             String wantedHelpPage = cmdArguments.get(0);
             allLoadedCmds.stream()
@@ -41,7 +41,7 @@ public abstract class GlobalHelpCommand extends Command {
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
                 .flatMap(c -> c.helpPage(msg))
                 .ifPresentOrElse(
-                        helpPage -> msg.getChannel().sendMessage(helpPage).submit(), 
+                        helpPage -> msg.getChannel().sendMessageEmbeds(helpPage).submit(), 
                         () -> msg.reply("No help page").submit()
                 );
         }

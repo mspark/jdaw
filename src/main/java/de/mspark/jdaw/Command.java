@@ -140,13 +140,13 @@ public abstract class Command extends TextListener {
         if (!missingUserPerm.isEmpty()) {
             var embed = new EmbedBuilder().setDescription("❌ Missing Permission:\n");
             missingUserPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
-            event.getChannel().sendMessage(embed.build()).submit();
+            event.getChannel().sendMessageEmbeds(embed.build()).submit();
             return false;
         }
         if (!missingBotPerm.isEmpty()) {
             var embed = new EmbedBuilder().setDescription("The bot needs the following permissions in order to execute the command:\n");
             missingBotPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
-            event.getChannel().sendMessage(embed.build()).submit();
+            event.getChannel().sendMessageEmbeds(embed.build()).submit();
             return false; 
         }
         return true;

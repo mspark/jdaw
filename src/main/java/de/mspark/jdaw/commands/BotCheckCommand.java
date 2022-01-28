@@ -59,7 +59,7 @@ public class BotCheckCommand extends Command {
         MessageEmbed embed = new EmbedBuilder()
                 .setTitle("🔭 Bot check")
                 .setDescription(botOnGuildText + "\n" + missingBotText).build();
-        msg.getChannel().sendMessage(embed).submit();
+        msg.getChannel().sendMessageEmbeds(embed).submit();
     }
 
     private List<BotGuilds> createBotList(long currentGuild) {
