@@ -39,4 +39,8 @@ public class JDAManager {
     public JDA getMain() {
         return this.jdas[0];
     }
+    
+    JDA[] getAll() {
+        return jdas;
+    }
 }

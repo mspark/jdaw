@@ -36,11 +36,10 @@ public abstract class Command extends TextListener {
      * @param conf
      * @param guilConfig
      * @param jdas
-     * @param balance When true, the command is executed (and listens) on any configured discord bot otherwise its 
-     *        always the main bot
+     * @param balanceSetting
      */
-    public Command(JDAWConfig config, GuildConfigService guildConfig, JDAManager jdas, boolean balance) {
-        super(guildConfig, jdas, balance);
+    public Command(JDAWConfig config, GuildConfigService guildConfig, JDAManager jdas, DistributionSetting balanceSetting) {
+        super(guildConfig, jdas, balanceSetting);
         this.guildConfig = guildConfig;
         this.config = config;
         var annotation = this.getClass().getAnnotation(CommandProperties.class);
@@ -52,6 +51,16 @@ public abstract class Command extends TextListener {
             }
         }
         commandProperties = annotation;
+    }
+    
+    /**
+     * Defines a command. Only the main bot listens to this. For more options see {@link #Command(JDAWConfig, GuildConfigService, JDAManager, DistributionSetting)}.
+     * @param config
+     * @param guildConfig
+     * @param jdas
+     */
+    public Command(JDAWConfig config, GuildConfigService guildConfig, JDAManager jdas) {
+        this(config, guildConfig, jdas, DistributionSetting.MAIN_ONLY);
     }
     
     /**
