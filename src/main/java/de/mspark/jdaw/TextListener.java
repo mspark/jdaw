@@ -8,13 +8,9 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public abstract class TextListener extends ListenerAdapter {
     protected final GuildConfigService guildConfig;
     
-    public TextListener(GuildConfigService guildConfig, JDAManager jdas, boolean balance) {
+    public TextListener(GuildConfigService guildConfig, JDAManager jdas, DistributionSetting setting) {
         this.guildConfig = guildConfig;
-        if (balance) {
-            jdas.getNextJDA().addEventListener(this);            
-        } else {
-            jdas.getMain().addEventListener(this);
-        }
+        setting.applySetting(jdas, this);
     }
     
     @Override

@@ -4,6 +4,7 @@ import java.util.List;
 
 import de.mspark.jdaw.Command;
 import de.mspark.jdaw.JDAManager;
+import de.mspark.jdaw.DistributionSetting;
 import de.mspark.jdaw.config.JDAWConfig;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -20,10 +21,10 @@ public abstract class GlobalHelpCommand extends Command {
     protected List<Command> allLoadedCmds; 
     
     public GlobalHelpCommand(JDAWConfig conf, GuildConfigService gc, JDAManager jdas, List<Command> allLoadedCmds) {
-        super(conf, gc, jdas, false);
+        super(conf, gc, jdas, DistributionSetting.MAIN_ONLY);
         this.allLoadedCmds = allLoadedCmds;
     }
-
+    
     @Override
     public void doActionOnCmd(Message msg, List<String> cmdArguments) {
         if (cmdArguments.isEmpty()) {
