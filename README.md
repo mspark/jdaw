@@ -108,6 +108,7 @@ In your project pom you need to add the distribution management:
 </distributionManagement>
 ```
 
+### Only JDAW
 Now you can add the dependency to JDAW.
 
 ```
@@ -121,3 +122,14 @@ Now you can add the dependency to JDAW.
 
 ```
 
+### Spring Boot with JDAW
+If you want to use spring boot, you can use the maintained spring-boot-parent instead of adding the JDAW dependency:
+
+```
+	<parent>
+		<groupId>de.mspark.jdaw</groupId>
+		<artifactId>jdaw-spring-boot</artifactId>
+		<version>3.0-SNAPSHOT</version>
+	</parent>
+```
+The distributionManagement 
