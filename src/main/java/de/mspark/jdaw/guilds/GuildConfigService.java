@@ -31,14 +31,14 @@ public class GuildConfigService {
 
     public <T extends Message> String getPrefix(Message msg) {
         return getGuild(msg)
-                .flatMap(g -> repo.findOne(g.getIdLong()))
+                .flatMap(g -> repo.findById(g.getIdLong()))
                 .map(cg -> cg.prefix())
                 .orElse(this.config.prefix());
     }
     
     public <T extends GenericMessageEvent> List<String> getWhitelistChannel(T event) {
         return getGuild(event)
-                .flatMap(g -> repo.findOne(g.getIdLong()))
+                .flatMap(g -> repo.findById(g.getIdLong()))
                 .map(cg -> cg.whitelist())
                 .orElseGet(Collections::emptyList);
     }

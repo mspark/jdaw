@@ -14,6 +14,9 @@ public class CustomGuildConf {
     private String prefix;
     private String whitelist;
 
+    public CustomGuildConf() {
+    }
+    
     public CustomGuildConf(long id, String prefix, List<String> whitelist) {
         super();
         this.id = id;
