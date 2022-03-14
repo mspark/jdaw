@@ -32,11 +32,11 @@ public class PrefixSetCommand extends Command {
     public void doActionOnCmd(Message msg, List<String> cmdArguments) {
         String prefix = filter(cmdArguments.get(0)).get();
         long guildId = msg.getGuild().getIdLong();
-        var guildConfig = repo.findOne(guildId)
+        var guildConfig = repo.findById(guildId)
             .map(g -> new CustomGuildConf(g.id(), prefix, g.whitelist()))
             .orElse(new CustomGuildConf(guildId, prefix));
         repo.save(guildConfig);
-        if (repo.exists(guildConfig.id())) {
+        if (repo.existsById(guildConfig.id())) {
         	msg.reply("ok, prefix is set to " + prefix).submit();
         } else {
         	msg.getChannel().sendMessage("This bot don't support a custom prefix").submit();

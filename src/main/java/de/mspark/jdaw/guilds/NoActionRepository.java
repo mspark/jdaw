@@ -17,12 +17,12 @@ class NoActionRepository {
         return new GuildRepository() {
             
             @Override
-            public Optional<CustomGuildConf> findOne(Long gid) {
+            public Optional<CustomGuildConf> findById(Long gid) {
                 return Optional.empty();
             }
             
             @Override
-            public boolean exists(Long gid) {
+            public boolean existsById(Long gid) {
                 return false;
             }
             

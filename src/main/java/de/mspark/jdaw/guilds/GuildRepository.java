@@ -10,8 +10,8 @@ public interface GuildRepository {
     
     void delete(CustomGuildConf entity);
     
-    boolean exists(Long gid);
+    boolean existsById(Long gid);
     
-    Optional<CustomGuildConf> findOne(Long gid);
+    Optional<CustomGuildConf> findById(Long gid);
 
 }
