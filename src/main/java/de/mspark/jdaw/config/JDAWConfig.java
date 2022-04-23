@@ -25,7 +25,7 @@ public interface JDAWConfig {
      * 
      * @return Custom prefix
      */
-    String prefix();
+    String defaultPrefix();
     
     /**
      * Discord API tokens. The first one is always the main token which is used for communicating by default.
