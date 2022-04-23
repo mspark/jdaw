@@ -2,8 +2,6 @@ package de.mspark.jdaw.guilds;
 
 import java.util.Optional;
 
-import de.mspark.jdaw.guilds.model.CustomGuildConf;
-
 public interface GuildRepository {
     
     CustomGuildConf save(CustomGuildConf g);

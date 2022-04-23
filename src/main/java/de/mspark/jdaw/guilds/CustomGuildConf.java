@@ -1,4 +1,4 @@
-package de.mspark.jdaw.guilds.model;
+package de.mspark.jdaw.guilds;
 
 import java.util.Collections;
 import java.util.List;
