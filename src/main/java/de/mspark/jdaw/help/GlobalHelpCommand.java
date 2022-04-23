@@ -20,8 +20,8 @@ public abstract class GlobalHelpCommand extends Command {
     
     protected List<Command> allLoadedCmds; 
     
-    public GlobalHelpCommand(JDAWConfig conf, GuildConfigService gc, JDAManager jdas, List<Command> allLoadedCmds) {
-        super(conf, gc, jdas, DistributionSetting.MAIN_ONLY);
+    public GlobalHelpCommand(GuildConfigService gc, JDAManager jdas, List<Command> allLoadedCmds) {
+        super(gc, jdas, DistributionSetting.MAIN_ONLY);
         this.allLoadedCmds = allLoadedCmds;
     }
     

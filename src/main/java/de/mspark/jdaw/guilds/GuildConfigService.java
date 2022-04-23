@@ -14,9 +14,9 @@ import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 @Service
 public class GuildConfigService {
     private JDAWConfig config;
-    private final GuildRepository repo;
+    private final Optional<GuildRepository> repo;
     
-    public GuildConfigService(JDAWConfig config, GuildRepository repo) {
+    public GuildConfigService(JDAWConfig config, Optional<GuildRepository> repo) {
         this.repo = repo;
         this.config = config;
     }
@@ -30,16 +30,22 @@ public class GuildConfigService {
     }
 
     public <T extends Message> String getPrefix(Message msg) {
-        return getGuild(msg)
-                .flatMap(g -> repo.findById(g.getIdLong()))
-                .map(cg -> cg.prefix())
-                .orElse(this.config.prefix());
+        return repo.flatMap(r ->
+            getGuild(msg)
+                .flatMap(g -> r.findById(g.getIdLong()))
+                .map(cg -> cg.prefix()))
+            .orElse(this.config.defaultPrefix());
     }
     
     public <T extends GenericMessageEvent> List<String> getWhitelistChannel(T event) {
-        return getGuild(event)
-                .flatMap(g -> repo.findById(g.getIdLong()))
-                .map(cg -> cg.whitelist())
-                .orElseGet(Collections::emptyList);
+        return repo.flatMap(r -> 
+                getGuild(event)
+                .flatMap(g -> r.findById(g.getIdLong()))
+                .map(cg -> cg.whitelist()))
+            .orElseGet(Collections::emptyList);
+    }
+    
+    public JDAWConfig globalConfig() {
+        return config;
     }
 }
