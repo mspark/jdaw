@@ -11,7 +11,6 @@ import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 
 /**
  * When implementing this with the {@link EnableHelpCommand} Annotation, a help command for all sub commands will be
@@ -40,7 +39,7 @@ public class GlobalHelpCommand extends Command {
             var eb = new EmbedBuilder().setTitle(config.botName()).setDescription(config.botDescription());
             allLoadedCmds.stream()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
-                .filter(cmd -> cmd.helpPage(msg).isPresent())
+                .filter(cmd -> cmd.helpPageWithAliases(msg).isPresent())
                 .forEach(cmd -> eb.addField(cmd.getTrigger(), cmd.getShortDescription(), false));
             msg.getChannel().sendMessageEmbeds(eb.build()).submit();
         } else {
@@ -49,16 +48,11 @@ public class GlobalHelpCommand extends Command {
                 .filter(c -> c.getTrigger().equalsIgnoreCase(wantedHelpPage))
                 .findFirst()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
-                .flatMap(c -> c.helpPage(msg))
+                .flatMap(c -> c.helpPageWithAliases(msg))
                 .ifPresentOrElse(
                     helpPage -> msg.getChannel().sendMessageEmbeds(helpPage).submit(),
                     () -> msg.reply("No help page").submit());
         }
-    }
-
-    @Override
-    public MessageEmbed fullHelpPage() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -99,11 +93,6 @@ public class GlobalHelpCommand extends Command {
             @Override
             public String trigger() {
                 return command.getTrigger();
-            }
-
-            @Override
-            public boolean helpPage() {
-                return props.helpPage();
             }
 
             @Override
