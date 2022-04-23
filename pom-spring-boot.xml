@@ -5,7 +5,7 @@
 
 	<groupId>de.mspark.jdaw</groupId>
 	<artifactId>jdaw-spring-boot</artifactId>
-	<version>3.0</version>
+	<version>4.0</version>
 	<name>jdaw-spring-boot</name>
 	<description>jdaw-spring-boot</description>
 	<packaging>pom</packaging>
