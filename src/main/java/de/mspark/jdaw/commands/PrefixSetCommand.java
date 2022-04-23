@@ -5,9 +5,8 @@ import java.util.Optional;
 
 import de.mspark.jdaw.Command;
 import de.mspark.jdaw.CommandProperties;
-import de.mspark.jdaw.JDAManager;
 import de.mspark.jdaw.DistributionSetting;
-import de.mspark.jdaw.config.JDAWConfig;
+import de.mspark.jdaw.JDAManager;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.guilds.GuildRepository;
 import de.mspark.jdaw.guilds.model.CustomGuildConf;
@@ -23,8 +22,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 public class PrefixSetCommand extends Command {
     private GuildRepository repo;
     
-    public PrefixSetCommand(JDAWConfig config, GuildConfigService guildConfig, GuildRepository repo, JDAManager jdas) {
-        super(config, guildConfig, jdas, DistributionSetting.BALANCE);
+    public PrefixSetCommand(GuildConfigService guildConfig, GuildRepository repo, JDAManager jdas) {
+        super(guildConfig, jdas, DistributionSetting.BALANCE);
         this.repo = repo;
     }
 
