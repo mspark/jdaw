@@ -10,6 +10,7 @@ import de.mspark.jdaw.JDAManager;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.guilds.GuildRepository;
 import de.mspark.jdaw.guilds.model.CustomGuildConf;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -17,8 +18,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 @CommandProperties(
 	trigger = "prefix", 
 	description = "Sets a custom prefix for the current guild",
-	userGuildPermissions = Permission.MANAGE_SERVER, 
-	helpPage = false)
+	userGuildPermissions = Permission.MANAGE_SERVER)
 public class PrefixSetCommand extends Command {
     private GuildRepository repo;
     
@@ -43,12 +43,12 @@ public class PrefixSetCommand extends Command {
     }
 
     @Override
-    protected MessageEmbed fullHelpPage() {
-        return null;
+    protected MessageEmbed commandHelpPage() {
+        return new EmbedBuilder().setDescription("Change your prefix! :)").build();
     }
     
-    // !!! SQL Injection possible - use this just as an example !!!
+    // this isjust as an example !!! maybe more advanced filters for SQL injection should be considered
     public Optional<String> filter(String desiredPrefix) {
-        return Optional.of(desiredPrefix);
+        return Optional.of(desiredPrefix).filter(s -> !s.contains(" "));
     }
 }

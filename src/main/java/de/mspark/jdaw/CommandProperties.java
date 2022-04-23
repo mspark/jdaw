@@ -41,8 +41,6 @@ public @interface CommandProperties {
     boolean executableWihtoutArgs() default false;
     
     String description();
-    
-    boolean helpPage() default true;
 
     /**
      * Specifies if this command can be executed inside a private chat with the bot (typically this is the case when a command

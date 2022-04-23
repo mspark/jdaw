@@ -65,11 +65,13 @@ public abstract class Command extends TextListener {
     public abstract void doActionOnCmd(Message msg, List<String> cmdArguments);
 
     /**
-     * Help page for the command (typically explains all sub-commands). All command aliases are appended at the end.
+     * Help page for the command (typically explains all sub-commands).
      * 
-     * @return Is allowed to be <code>null</code> when {@link CommandProperties#helpPage()} is set to false
+     * @return Can be null when no help page for the command is desired otherwise it must contain a printable embed
      */
-    protected abstract MessageEmbed fullHelpPage();
+    protected MessageEmbed commandHelpPage() {
+        return null;
+    }
 
     /**
      * A short description what this command is for. It is shown in the global command overview inside a big message
@@ -78,7 +80,7 @@ public abstract class Command extends TextListener {
      * @return
      */
     public String getShortDescription() {
-        return commandProperties.helpPage() ? commandProperties.description() : null;
+        return commandProperties.description();
     }
 
     @Override
@@ -188,23 +190,23 @@ public abstract class Command extends TextListener {
         return true;
     }
 
-    public final Optional<MessageEmbed> helpPage(Message msg) {
-        Optional<MessageEmbed> opt = Optional.empty();
-        if (commandProperties.helpPage()) {
-            var embed = fullHelpPage();
-            if (getAliases().length > 0) {
-                List<String> allTrigger = new ArrayList<String>();
-                allTrigger.add(getTrigger());
-                allTrigger.addAll(List.of(getAliases()));
-                String prefix = guildConfig.getPrefix(msg);
-                String aliasAppendix = allTrigger.stream()
-                    .map(a -> prefix + a)
-                    .collect(Collectors.joining(", "));
-                embed = new EmbedBuilder(embed).setFooter("Aliases: " + aliasAppendix).build();
-            }
-            opt = Optional.ofNullable(embed);
+    public Optional<MessageEmbed> helpPageWithAliases(Message msg) {
+        return Optional.ofNullable(commandHelpPage()).map(EmbedBuilder::new)
+            .map(e -> this.appendAliasesToEmbed(msg, e).build());
+    }
+
+    private EmbedBuilder appendAliasesToEmbed(Message msg, EmbedBuilder emb) {
+        if (getAliases().length > 0) {
+            List<String> allTrigger = new ArrayList<String>();
+            allTrigger.add(getTrigger());
+            allTrigger.addAll(List.of(getAliases()));
+            String prefix = guildConfig.getPrefix(msg);
+            String aliasAppendix = allTrigger.stream()
+                .map(a -> prefix + a)
+                .collect(Collectors.joining(", "));
+            emb.setFooter("Aliases: " + aliasAppendix);
         }
-        return opt;
+        return emb;
     }
 
     protected CommandProperties commandProperties() {

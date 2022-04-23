@@ -47,7 +47,7 @@ public class BotCheckCommand extends Command {
     }
 
     @Override
-    public MessageEmbed fullHelpPage() {
+    public MessageEmbed commandHelpPage() {
         return new EmbedBuilder().setDescription("No help page for this").build();
     }
 
