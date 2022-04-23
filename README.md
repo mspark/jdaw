@@ -26,12 +26,13 @@ An example discord bot which uses JDAW can be found in [this](https://github.com
 A single command is a spring bean and is provided when using the `@CommandProperties` annotation. A very simple command can look like this:
 
 ```java
-@CommandProperties(trigger = "test", description = "Demonstration of different JDA execution")
-public class BalanceTestCommand extends Command {
+@CommandProperties(trigger = "test", description = "Demonstration of different JDA execution", userGuildPermissions = Permission.MANAGE_SERVER)
+public class MyFancyCommand extends Command {
 
     @Override
-    public void doActionOnCmd(Message msg, List<String> cmdArguments) {}
-   // ....
+    public void doActionOnCmd(Message msg, List<String> cmdArguments) {
+    	// your action
+    }
 }
 
 ```
