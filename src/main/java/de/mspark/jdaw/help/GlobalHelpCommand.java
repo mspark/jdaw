@@ -1,15 +1,10 @@
 package de.mspark.jdaw.help;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 
-import de.mspark.jdaw.Command;
-import de.mspark.jdaw.CommandProperties;
-import de.mspark.jdaw.DistributionSetting;
-import de.mspark.jdaw.JDAManager;
-import de.mspark.jdaw.guilds.GuildConfigService;
+import de.mspark.jdaw.core.DiscordAction;
+import de.mspark.jdaw.core.TextCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 
 /**
@@ -18,23 +13,17 @@ import net.dv8tion.jda.api.entities.Message;
  *
  * @author marcel
  */
-public class GlobalHelpCommand extends Command {
-
-    @CommandProperties(trigger = "sample", description = "sample")
-    static class DefaultProperties {
-    }
-
+public class GlobalHelpCommand extends TextCommand {
     private HelpConfig config;
-    private List<Command> allLoadedCmds;
+    private List<DiscordAction> allLoadedCmds;
 
-    public GlobalHelpCommand(GuildConfigService gc, JDAManager jdas, List<Command> allLoadedCmds, HelpConfig config) {
-        super(gc, jdas, DistributionSetting.MAIN_ONLY);
+    public GlobalHelpCommand(List<DiscordAction> allLoadedCmds, HelpConfig config) {
         this.allLoadedCmds = allLoadedCmds;
         this.config = config;
     }
 
     @Override
-    public void doActionOnCmd(Message msg, List<String> cmdArguments) {
+    public void doActionOnTrigger(Message msg, List<String> cmdArguments) {
         if (cmdArguments.isEmpty()) {
             var eb = new EmbedBuilder().setTitle(config.botName()).setDescription(config.botDescription());
             allLoadedCmds.stream()
@@ -56,74 +45,17 @@ public class GlobalHelpCommand extends Command {
     }
 
     @Override
-    public String getShortDescription() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getTrigger() {
+    public String trigger() {
         return "help";
     }
 
-    /*
-     * This class has no @CommandProperties annotation because the bean is created elsewhere. Through that, we need to
-     * provide an instance of the annotation manually.
-     */
     @Override
-    public CommandProperties commandProperties() {
-        var props = DefaultProperties.class.getAnnotation(CommandProperties.class);
-        var command = this;
-        return new CommandProperties() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return props.annotationType();
-            }
-
-            @Override
-            public Permission[] userGuildPermissions() {
-                return props.userGuildPermissions();
-            }
-
-            @Override
-            public Permission[] userChannelPermissions() {
-                return props.userChannelPermissions();
-            }
-
-            @Override
-            public String trigger() {
-                return command.getTrigger();
-            }
-
-            @Override
-            public boolean executableWihtoutArgs() {
-                return true;
-            }
-
-            @Override
-            public String description() {
-                return command.getShortDescription();
-            }
-
-            @Override
-            public Permission[] botGuildPermissions() {
-                return props.botGuildPermissions();
-            }
-
-            @Override
-            public boolean botAdminOnly() {
-                return props.botAdminOnly();
-            }
-
-            @Override
-            public String[] aliases() {
-                return props.aliases();
-            }
-
-            @Override
-            public boolean privateChatAllowed() {
-                return props.privateChatAllowed();
-            }
-        };
+    public String description() {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public boolean executableWihtoutArgs() {
+        return true;
     }
 }

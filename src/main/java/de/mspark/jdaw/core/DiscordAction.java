@@ -1,4 +1,4 @@
-package de.mspark.jdaw;
+package de.mspark.jdaw.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.mspark.jdaw.config.JDAWConfig;
+import de.mspark.jdaw.config.JDAManager;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -17,60 +17,31 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
- * A new discord command wich has a top level command trigger and does somehting. The {@link CommandProperties}
+ * A new discord command wich has a top level command trigger and does somehting. The {@link TextCommand}
  * annotation is necessary for the concrecte implementation, in order to listen to events.
  *
  * @author marcel
  */
-public abstract class Command extends TextListener {
+public class DiscordAction extends ListenerAdapter {
 
-    private final CommandProperties commandProperties;
+    private final TextCommand commandProperties;
     private final GuildConfigService guildConfig;
 
     /**
-     * Defines a command. {@link CommandProperties} is necessary to define properties.
+     * Defines a command. {@link TextCommand} is necessary to define properties.
      * 
      * @param conf
      * @param guilConfig
      * @param jdas
      * @param balanceSetting
      */
-    public Command(GuildConfigService guildConfig, JDAManager jdas, DistributionSetting balanceSetting) {
-        super(guildConfig, jdas, balanceSetting);
+    public DiscordAction(GuildConfigService guildConfig, JDAManager jdas, TextCommand action) {
         this.guildConfig = guildConfig;
-        commandProperties = commandProperties();
-    }
-
-    /**
-     * Defines a command. Only the main bot listens to this. For more options see
-     * {@link #Command(JDAWConfig, GuildConfigService, JDAManager, DistributionSetting)}.
-     * 
-     * @param config
-     * @param guildConfig
-     * @param jdas
-     */
-    public Command(GuildConfigService guildConfig, JDAManager jdas) {
-        this(guildConfig, jdas, DistributionSetting.MAIN_ONLY);
-    }
-
-    /**
-     * The action which is executed when the command matches.
-     * 
-     * @param event
-     * @param cmd   The list of addiotional arguments of the command. The trigger itself is not present. May be empty
-     *              when no arguments were given.
-     */
-    public abstract void doActionOnCmd(Message msg, List<String> cmdArguments);
-
-    /**
-     * Help page for the command (typically explains all sub-commands).
-     * 
-     * @return Can be null when no help page for the command is desired otherwise it must contain a printable embed
-     */
-    protected MessageEmbed commandHelpPage() {
-        return null;
+        this.commandProperties = action;
+        commandProperties.distributionSetting().applySetting(jdas, this);
     }
 
     /**
@@ -84,17 +55,27 @@ public abstract class Command extends TextListener {
     }
 
     @Override
-    public boolean isPrivateChatAllowed() {
-        return commandProperties.privateChatAllowed();
+    public void onMessageReceived(MessageReceivedEvent event) {
+        if (checkAllowedScope(event)) {
+            var arguments = getCmdArguments(event.getMessage());
+            if (matchesTrigger(event.getMessage())) {
+                arguments.remove(0);
+                invoke(event, arguments);
+            }
+        }
+    }
+    
+    private boolean checkAllowedScope(MessageReceivedEvent event) {
+        if (event.isFromType(ChannelType.PRIVATE)) {
+            return commandProperties.privateChatAllowed();
+        } else {
+            return event.isFromType(ChannelType.TEXT) && isChannelAllowed(event);
+        }
     }
 
-    @Override
-    public final void onTextMessageReceived(MessageReceivedEvent event) {
-        var arguments = getCmdArguments(event.getMessage());
-        if (matchesTrigger(event.getMessage())) {
-            arguments.remove(0);
-            invoke(event, arguments);
-        }
+    private boolean isChannelAllowed(MessageReceivedEvent event) {
+        var whitelist = guildConfig.getWhitelistChannel(event);
+        return whitelist.isEmpty() || whitelist.contains(event.getChannel().getId());
     }
 
     protected boolean matchesTrigger(Message msg) {
@@ -131,7 +112,7 @@ public abstract class Command extends TextListener {
     private void invokeWithArguments(MessageReceivedEvent event, List<String> arguments) {
         boolean enoughArguments = commandProperties.executableWihtoutArgs() || arguments.size() >= 1;
         if (enoughArguments) {
-            doActionOnCmd(event.getMessage(), arguments);
+            commandProperties.doActionOnTrigger(event.getMessage(), arguments);
         } else {
             event.getChannel().sendMessage("Zu wenig Argumente!. Benutze den help befehl").submit();
         }
@@ -191,7 +172,7 @@ public abstract class Command extends TextListener {
     }
 
     public Optional<MessageEmbed> helpPageWithAliases(Message msg) {
-        return Optional.ofNullable(commandHelpPage()).map(EmbedBuilder::new)
+        return Optional.ofNullable(commandProperties.commandHelpPage()).map(EmbedBuilder::new)
             .map(e -> this.appendAliasesToEmbed(msg, e).build());
     }
 
@@ -207,14 +188,6 @@ public abstract class Command extends TextListener {
             emb.setFooter("Aliases: " + aliasAppendix);
         }
         return emb;
-    }
-
-    protected CommandProperties commandProperties() {
-        var annotation = this.getClass().getAnnotation(CommandProperties.class);
-        if (annotation == null) {
-            throw new Error("No annotation with properties found. Fix this and rebuild application");
-        }
-        return annotation;
     }
 
 }

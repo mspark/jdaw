@@ -4,14 +4,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.stereotype.Service;
-
 import de.mspark.jdaw.config.JDAWConfig;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 
-@Service
 public class GuildConfigService {
     private JDAWConfig config;
     private final Optional<GuildRepository> repo;

@@ -1,6 +1,8 @@
-package de.mspark.jdaw;
+package de.mspark.jdaw.core;
 
 import java.util.Arrays;
+
+import de.mspark.jdaw.config.JDAManager;
 
 public enum DistributionSetting {
     /**
@@ -8,7 +10,7 @@ public enum DistributionSetting {
      */
     MAIN_ONLY() {
         @Override
-        public void applySetting(JDAManager jdas, TextListener listener) {
+        public void applySetting(JDAManager jdas, DiscordAction listener) {
             jdas.getMain().addEventListener(listener);
         }
     }, 
@@ -19,7 +21,7 @@ public enum DistributionSetting {
      */
     BALANCE() {
         @Override
-        public void applySetting(JDAManager jdas, TextListener listener) {
+        public void applySetting(JDAManager jdas, DiscordAction listener) {
             jdas.getNextJDA().addEventListener(listener);
         }
     }, 
@@ -29,10 +31,10 @@ public enum DistributionSetting {
      */
     ALL() {
         @Override
-        public void applySetting(JDAManager jdas, TextListener listener) {
-            Arrays.stream(jdas.getAll()).forEach(j -> j.addEventListener(listener));
+        public void applySetting(JDAManager jdas, DiscordAction listener) {
+            Arrays.stream(jdas.getAllJdaRaw()).forEach(j -> j.addEventListener(listener));
         }
     };
 
-    public abstract void applySetting(JDAManager jdas, TextListener listener);
+    public abstract void applySetting(JDAManager jdas, DiscordAction listener);
 }

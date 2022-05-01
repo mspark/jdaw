@@ -1,10 +1,8 @@
-package de.mspark.jdaw;
-
-import net.dv8tion.jda.api.JDA;
+package de.mspark.jdaw.config;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.springframework.stereotype.Component;
+import net.dv8tion.jda.api.JDA;
 
 /**
  * Thread safe way to receive balance all actions to all available JDA instances. 
@@ -13,7 +11,6 @@ import org.springframework.stereotype.Component;
  * 
  * @author marcel
  */
-@Component
 public class JDAManager {
 
     private final JDA[] jdas;
@@ -40,7 +37,8 @@ public class JDAManager {
         return this.jdas[0];
     }
     
-    JDA[] getAll() {
+    // TODO 
+    public JDA[] getAllJdaRaw() {
         return jdas;
     }
 }

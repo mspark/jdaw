@@ -1,14 +1,10 @@
-package de.mspark.jdaw.commands;
+package de.mspark.jdaw.maintainance;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.mspark.jdaw.Command;
-import de.mspark.jdaw.CommandProperties;
-import de.mspark.jdaw.DistributionSetting;
-import de.mspark.jdaw.JDAManager;
-import de.mspark.jdaw.guilds.GuildConfigService;
+import de.mspark.jdaw.core.TextCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -16,17 +12,13 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-@CommandProperties(
-    trigger = "botcheck", description = "Check bot availability on this guild",
-    userGuildPermissions = Permission.MANAGE_SERVER, 
-    executableWihtoutArgs = true)
-public class BotCheckCommand extends Command {
+public class BotCheckCommand extends TextCommand {
 
     private static class BotGuilds {
-        private final JDA bot; 
-        private final List<Guild> guilds; 
+        private final JDA bot;
+        private final List<Guild> guilds;
         private final boolean onServer;
-        
+
         public BotGuilds(JDA jda, long currentGuildId) {
             this.bot = jda;
             guilds = jda.getGuilds();
@@ -36,13 +28,32 @@ public class BotCheckCommand extends Command {
 
     private JDA[] allBots;
 
-    public BotCheckCommand(GuildConfigService guilConfig, JDAManager jdas, JDA[] allJDA) {
-        super(guilConfig, jdas, DistributionSetting.BALANCE);
-        this.allBots = allJDA;
+    public BotCheckCommand(JDA[] jdas) {
+        this.allBots = jdas;
     }
 
     @Override
-    public void doActionOnCmd(Message msg, List<String> cmdArguments) {
+    public String trigger() {
+        return "botcheck";
+    }
+
+    @Override
+    public String description() {
+        return "Check bot availability on this guild";
+    }
+
+    @Override
+    public boolean executableWihtoutArgs() {
+        return true;
+    }
+
+    @Override
+    public Permission[] userGuildPermissions() {
+        return new Permission[] { Permission.MANAGE_CHANNEL };
+    }
+
+    @Override
+    public void doActionOnTrigger(Message msg, List<String> cmdArguments) {
         checkPowerUps(msg);
     }
 
@@ -57,32 +68,32 @@ public class BotCheckCommand extends Command {
         String botOnGuildText = botOkMessage(botGuildList);
         String missingBotText = missingBotInfoWithInvites(botGuildList);
         MessageEmbed embed = new EmbedBuilder()
-                .setTitle("🔭 Bot check")
-                .setDescription(botOnGuildText + "\n" + missingBotText).build();
+            .setTitle("🔭 Bot check")
+            .setDescription(botOnGuildText + "\n" + missingBotText).build();
         msg.getChannel().sendMessageEmbeds(embed).submit();
     }
 
     private List<BotGuilds> createBotList(long currentGuild) {
         return Arrays.stream(allBots)
-                .map(jda -> new BotGuilds(jda, currentGuild))
-                .toList();
+            .map(jda -> new BotGuilds(jda, currentGuild))
+            .toList();
     }
 
     private static String botOkMessage(List<BotGuilds> botGuildList) {
         String botOnGuildText = botGuildList.stream()
-                .filter(bg -> bg.onServer)
-                .map(bg -> "✅ %s is on this Server".formatted(bg.bot.getSelfUser().getAsTag()))
-                .collect(Collectors.joining("\n"));
+            .filter(bg -> bg.onServer)
+            .map(bg -> "✅ %s is on this Server".formatted(bg.bot.getSelfUser().getAsTag()))
+            .collect(Collectors.joining("\n"));
         return botOnGuildText;
     }
 
     private static String missingBotInfoWithInvites(List<BotGuilds> botGuildList) {
-        var perms = new Permission[] {Permission.VOICE_MOVE_OTHERS};
+        var perms = new Permission[] { Permission.VOICE_MOVE_OTHERS };
         String missingBotText = botGuildList.stream()
-                .filter(bg -> !bg.onServer)
-                .map(bg -> "❌ %s is not present on this Server. [Invite it.](%s) \n"
+            .filter(bg -> !bg.onServer)
+            .map(bg -> "❌ %s is not present on this Server. [Invite it.](%s) \n"
                 .formatted(bg.bot.getSelfUser().getAsTag(), bg.bot.getInviteUrl(perms)))
-                .reduce((a,b) -> a + "\n" + b).orElse("\nEvery bot is up!");
+            .reduce((a, b) -> a + "\n" + b).orElse("\nEvery bot is up!");
         return missingBotText;
     }
 

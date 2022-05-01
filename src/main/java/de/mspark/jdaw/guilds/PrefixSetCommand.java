@@ -2,31 +2,26 @@ package de.mspark.jdaw.guilds;
 
 import java.util.List;
 
-import de.mspark.jdaw.Command;
-import de.mspark.jdaw.DistributionSetting;
-import de.mspark.jdaw.JDAManager;
+import de.mspark.jdaw.config.JDAManager;
+import de.mspark.jdaw.core.DistributionSetting;
+import de.mspark.jdaw.core.TextCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-// Disabled due to security concerns. 
-//@CommandProperties(
-//    trigger = "prefix", 
-//    description = "Sets a custom prefix for the current guild",
-//    userGuildPermissions = Permission.MANAGE_SERVER)
-public class PrefixSetCommand extends Command {
+public class PrefixSetCommand extends TextCommand {
 
     private final GuildRepository repo;
-    public final GuildPrefixFilter prefixFilter;
+    private final GuildPrefixFilter prefixFilter;
 
     public PrefixSetCommand(GuildConfigService guildConfig, GuildRepository repo, JDAManager jdas, GuildPrefixFilter filter) {
-        super(guildConfig, jdas, DistributionSetting.BALANCE);
         this.repo = repo;
         this.prefixFilter = filter;
     }
 
     @Override
-    public void doActionOnCmd(Message msg, List<String> cmdArguments) {
+    public void doActionOnTrigger(Message msg, List<String> cmdArguments) {
         prefixFilter.filter(cmdArguments.get(0))
             .ifPresentOrElse(p -> setPrefix(msg, p), () -> msg.reply("Invalid prefix").submit());
     }
@@ -45,7 +40,27 @@ public class PrefixSetCommand extends Command {
     }
 
     @Override
-    protected MessageEmbed commandHelpPage() {
+    public MessageEmbed commandHelpPage() {
         return new EmbedBuilder().setDescription("Change your prefix! :)").build();
+    }
+
+    @Override
+    public String trigger() {
+        return "prefix";
+    }
+
+    @Override
+    public String description() {
+        return "Sets a custom prefix for the current guild";
+    }
+    
+    @Override
+    public DistributionSetting distributionSetting() {
+        return DistributionSetting.BALANCE;
+    }
+    
+    @Override
+    public Permission[] userGuildPermissions() {
+        return new Permission[] {Permission.MANAGE_SERVER};
     }
 }
