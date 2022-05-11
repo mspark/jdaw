@@ -145,7 +145,7 @@ public class DiscordAction extends ListenerAdapter {
         String[] arguments = msg.getContentRaw().split("\\s+");
         String prefix = guildConfig.getPrefix(msg);
         if (arguments.length > 0 && arguments[0].startsWith(prefix)) {
-            arguments[0] = arguments[0].substring(1);
+            arguments[0] = arguments[0].substring(prefix.length());
         }
         return new ArrayList<String>(Arrays.asList(arguments));
     }
