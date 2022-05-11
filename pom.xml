@@ -5,7 +5,7 @@
 	<groupId>de.mspark</groupId>
 	<artifactId>jdaw</artifactId>
 	<packaging>jar</packaging>
-	<version>4.0</version>
+	<version>5.0.SPRING</version>
 	<name>Java Discord API Wrapper</name>
 
 	<properties>
@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
-			<version>4.2.1_253</version>
+  			<version>5.0.0-alpha.4</version>
 		</dependency>
 	</dependencies>
 
