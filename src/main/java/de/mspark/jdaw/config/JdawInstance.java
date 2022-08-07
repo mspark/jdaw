@@ -1,13 +1,13 @@
 package de.mspark.jdaw.config;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import de.mspark.jdaw.core.TextListenerAction;
 import de.mspark.jdaw.core.TextCommand;
+import de.mspark.jdaw.core.TextListenerAction;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.help.GlobalHelpCommand;
 import de.mspark.jdaw.help.HelpConfig;
@@ -54,24 +54,12 @@ public class JdawInstance {
      * 
      * @param cmd
      */
-    public void register(TextCommand cmd) {
-        var action = new TextListenerAction(guildConfig, cmd);
-        action.registerOn(jdas);
-        registeredActions.add(action);
-        refreshGlobalHelpCmd();
-    }
-
-    /**
-     * Register multiple commands simultaneously.
-     * 
-     * @param textCmds
-     */
-    public void registerAll(TextCommand... textCmds) {
-        List<TextListenerAction> actions = new ArrayList<>();
-        for (var action : textCmds) {
-            actions.add(new TextListenerAction(guildConfig, action));
-        }
-        registeredActions.addAll(actions);
+    public void register(TextCommand... cmds) {
+        Stream.of(cmds).forEach(cmd -> {
+            var action = new TextListenerAction(guildConfig, cmd);
+            action.registerOn(jdas);
+            registeredActions.add(action);
+        });
         refreshGlobalHelpCmd();
     }
 

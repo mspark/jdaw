@@ -96,7 +96,7 @@ public class JdawInstanceBuilder {
         if (loadDefaultCommands) {
             cmds.add(new PingCommand());
             cmds.add(new BotCheckCommand());
-            instance.registerAll(cmds.toArray(TextCommand[]::new));
+            instance.register(cmds.toArray(TextCommand[]::new));
         }
         return instance;
     }
