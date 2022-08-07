@@ -1,11 +1,12 @@
 package de.mspark.jdaw.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import de.mspark.jdaw.core.DiscordAction;
+import de.mspark.jdaw.core.TextListenerAction;
 import de.mspark.jdaw.core.TextCommand;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.help.GlobalHelpCommand;
@@ -13,16 +14,15 @@ import de.mspark.jdaw.help.HelpConfig;
 
 /**
  * Configured JDAW instance which holds all necessary configuration to start the a discord connection with configured 
- * features. For feature configuration use the {@link JdawBuilder}. 
- * 
- * The instance must be started after creation! Use {@link #start()} for this.
- * 
+ * features. For feature configuration use the {@link JdawInstanceBuilder}. 
+ *
  * Example usage:
  * <pre><code>
- * var instance = new JdawInstance(config).buildInstance();
- * instance.register(new Command());
- * instance.start();
+ * var instance = new JdawInstanceBuilder(config).buildJdawInstance();
+ * instance.register(command);
  * </code></pre>
+ * 
+ * It is recommended to use the builder for adding commands to the bot when possible.
  * 
  * @author marcel
  */
@@ -30,53 +30,63 @@ public class JdawInstance {
 
     private final JDAManager jdas;
     private final GuildConfigService guildConfig;
-    private final List<TextCommand> commandActions = new ArrayList<>();
-    private final Optional<HelpConfig> helpConfig;
-    private boolean started;
 
-    JdawInstance(JDAManager jdas, GuildConfigService guildConfig, Optional<HelpConfig> helpConfig) {
-        super();
+    private Optional<GlobalHelpCommand> helpCommand = Optional.empty();
+    private final List<TextListenerAction> registeredActions = new LinkedList<>();
+
+    JdawInstance(JDAManager jdas, GuildConfigService guildConfig) {
+        this(jdas, guildConfig, null);
+    }
+
+    JdawInstance(JDAManager jdas, GuildConfigService guildConfig, HelpConfig config) {
         this.jdas = jdas;
         this.guildConfig = guildConfig;
-        this.helpConfig = helpConfig;
+        if (config != null) {
+            var helpCommand = new GlobalHelpCommand(registeredActions, config);
+            this.helpCommand = Optional.of(helpCommand);
+            var helpAction = new TextListenerAction(guildConfig, helpCommand);
+            helpAction.registerOn(jdas);
+        }
     }
-
-    public JDAManager jdaManager() {
-        return jdas;
-    }
-
-    public GuildConfigService guildConfig() {
-        return guildConfig;
+    
+    /**
+     * Immediately register a command on the discord bot. 
+     * 
+     * @param cmd
+     */
+    public void register(TextCommand cmd) {
+        var action = new TextListenerAction(guildConfig, cmd);
+        action.registerOn(jdas);
+        registeredActions.add(action);
+        refreshGlobalHelpCmd();
     }
 
     /**
-     * Register text command actions for this JDAW instance. 
+     * Register multiple commands simultaneously.
      * 
-     * @param action
-     * @throws IllegalStateException When method is called after instance was started
+     * @param textCmds
      */
-    public void register(TextCommand... action) {
-        if (started) {
-            throw new IllegalStateException("Instance was already started");
+    public void registerAll(TextCommand... textCmds) {
+        List<TextListenerAction> actions = new ArrayList<>();
+        for (var action : textCmds) {
+            actions.add(new TextListenerAction(guildConfig, action));
         }
-        commandActions.addAll(Arrays.asList(action));
+        registeredActions.addAll(actions);
+        refreshGlobalHelpCmd();
     }
 
+    private void refreshGlobalHelpCmd() {
+        helpCommand.ifPresent(help -> help.setActions(Collections.unmodifiableList(registeredActions)));
+    }
+    
     /**
-     * Creates a running discord actions for all the registed {@link TextCommand}. This can only be done once per
-     * instance.
+     * Returns the registered text listener. The global help command is always missing (event if its configured). 
      * 
-     * @return All started actions
+     * @return
      */
-    public List<DiscordAction> start() {
-        List<DiscordAction> cmds = new ArrayList<>();
-        for (var action : commandActions) {
-            cmds.add(new DiscordAction(guildConfig, jdas, action));
-        }
-        helpConfig.map(hc -> new GlobalHelpCommand(new ArrayList<>(cmds), hc))
-            .map(gc -> new DiscordAction(guildConfig, jdas, gc))
-            .ifPresent(cmds::add);
-        return cmds;
+    public List<TextListenerAction> getRegisterdActions() {
+        var list = new LinkedList<>(registeredActions);
+        return list;
     }
 
 }

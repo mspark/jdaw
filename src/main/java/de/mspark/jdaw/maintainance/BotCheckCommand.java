@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.mspark.jdaw.config.JDAManager;
 import de.mspark.jdaw.core.TextCommand;
+import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -28,8 +30,9 @@ public class BotCheckCommand extends TextCommand {
 
     private JDA[] allBots;
 
-    public BotCheckCommand(JDA[] jdas) {
-        this.allBots = jdas;
+    @Override
+    public void onRegister(JDAManager jdaManager, GuildConfigService guildConfig) {
+        this.allBots = jdaManager.getAllJdaRaw();
     }
 
     @Override
@@ -74,6 +77,9 @@ public class BotCheckCommand extends TextCommand {
     }
 
     private List<BotGuilds> createBotList(long currentGuild) {
+        if (allBots == null) {
+            throw new IllegalStateException("Command was not registered");
+        }
         return Arrays.stream(allBots)
             .map(jda -> new BotGuilds(jda, currentGuild))
             .toList();

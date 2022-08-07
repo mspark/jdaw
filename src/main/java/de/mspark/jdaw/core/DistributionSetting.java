@@ -10,7 +10,7 @@ public enum DistributionSetting {
      */
     MAIN_ONLY() {
         @Override
-        public void applySetting(JDAManager jdas, DiscordAction listener) {
+        public void applySetting(JDAManager jdas, TextListenerAction listener) {
             jdas.getMain().addEventListener(listener);
         }
     }, 
@@ -21,7 +21,7 @@ public enum DistributionSetting {
      */
     BALANCE() {
         @Override
-        public void applySetting(JDAManager jdas, DiscordAction listener) {
+        public void applySetting(JDAManager jdas, TextListenerAction listener) {
             jdas.getNextJDA().addEventListener(listener);
         }
     }, 
@@ -31,10 +31,10 @@ public enum DistributionSetting {
      */
     ALL() {
         @Override
-        public void applySetting(JDAManager jdas, DiscordAction listener) {
+        public void applySetting(JDAManager jdas, TextListenerAction listener) {
             Arrays.stream(jdas.getAllJdaRaw()).forEach(j -> j.addEventListener(listener));
         }
     };
 
-    public abstract void applySetting(JDAManager jdas, DiscordAction listener);
+    public abstract void applySetting(JDAManager jdas, TextListenerAction listener);
 }

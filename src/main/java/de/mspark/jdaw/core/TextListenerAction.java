@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
  *
  * @author marcel
  */
-public class DiscordAction extends ListenerAdapter {
+public final class TextListenerAction extends ListenerAdapter implements Invokable {
 
     private final TextCommand commandProperties;
     private final GuildConfigService guildConfig;
@@ -35,13 +35,16 @@ public class DiscordAction extends ListenerAdapter {
      * 
      * @param conf
      * @param guilConfig
-     * @param jdas
      * @param balanceSetting
      */
-    public DiscordAction(GuildConfigService guildConfig, JDAManager jdas, TextCommand action) {
+    public TextListenerAction(GuildConfigService guildConfig, TextCommand action) {
         this.guildConfig = guildConfig;
         this.commandProperties = action;
+    }
+    
+    public void registerOn(JDAManager jdas) {
         commandProperties.distributionSetting().applySetting(jdas, this);
+        commandProperties.onRegister(jdas, guildConfig);
     }
 
     /**
@@ -50,8 +53,16 @@ public class DiscordAction extends ListenerAdapter {
      * 
      * @return
      */
-    public String getShortDescription() {
+    public String description() {
         return commandProperties.description();
+    }
+
+    public String trigger() {
+        return commandProperties.trigger();
+    }
+
+    public String[] aliases() {
+        return commandProperties.aliases();
     }
 
     @Override
@@ -83,17 +94,9 @@ public class DiscordAction extends ListenerAdapter {
         if (arguments.isEmpty())
             return false;
         var cmd = arguments.get(0);
-        var allTrigger = new ArrayList<>(Arrays.asList(getAliases()));
-        allTrigger.add(getTrigger());
+        var allTrigger = new ArrayList<>(Arrays.asList(aliases()));
+        allTrigger.add(trigger());
         return allTrigger.stream().filter(t -> cmd.equalsIgnoreCase(t)).findAny().isPresent();
-    }
-
-    public String getTrigger() {
-        return commandProperties.trigger();
-    }
-
-    public String[] getAliases() {
-        return commandProperties.aliases();
     }
 
     private void invoke(MessageReceivedEvent event, List<String> arguments) {
@@ -119,22 +122,22 @@ public class DiscordAction extends ListenerAdapter {
     }
 
     private boolean permissionCheck(MessageReceivedEvent event) {
-        var missingUserPerm = extractMissingPermission(commandProperties.userGuildPermissions(),
+        var permsMissingUser = extractMissingPermission(commandProperties.userGuildPermissions(),
             event.getMember().getPermissions());
         Member ownUser = event.getGuild().getSelfMember();
-        var missingBotPerm = extractMissingPermission(commandProperties.botGuildPermissions(),
+        var permsMissingBot = extractMissingPermission(commandProperties.botGuildPermissions(),
             ownUser.getPermissions());
 
-        if (!missingUserPerm.isEmpty()) {
+        if (!permsMissingUser.isEmpty()) {
             var embed = new EmbedBuilder().setDescription("❌ Missing Permission:\n");
-            missingUserPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
+            permsMissingUser.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
             event.getChannel().sendMessageEmbeds(embed.build()).submit();
             return false;
         }
-        if (!missingBotPerm.isEmpty()) {
+        if (!permsMissingBot.isEmpty()) {
             var embed = new EmbedBuilder()
                 .setDescription("The bot needs the following permissions in order to execute the command:\n");
-            missingBotPerm.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
+            permsMissingBot.forEach(missingPerm -> embed.appendDescription(missingPerm.name()));
             event.getChannel().sendMessageEmbeds(embed.build()).submit();
             return false; 
         }
@@ -172,15 +175,16 @@ public class DiscordAction extends ListenerAdapter {
     }
 
     public Optional<MessageEmbed> helpPageWithAliases(Message msg) {
-        return Optional.ofNullable(commandProperties.commandHelpPage()).map(EmbedBuilder::new)
-            .map(e -> this.appendAliasesToEmbed(msg, e).build());
+        return Optional.ofNullable(commandProperties.commandHelpPage())
+                .map(EmbedBuilder::new)
+                .map(e -> this.appendAliasesToEmbed(msg, e).build());
     }
 
     private EmbedBuilder appendAliasesToEmbed(Message msg, EmbedBuilder emb) {
-        if (getAliases().length > 0) {
+        if (aliases().length > 0) {
             List<String> allTrigger = new ArrayList<String>();
-            allTrigger.add(getTrigger());
-            allTrigger.addAll(List.of(getAliases()));
+            allTrigger.add(trigger());
+            allTrigger.addAll(List.of(aliases()));
             String prefix = guildConfig.getPrefix(msg);
             String aliasAppendix = allTrigger.stream()
                 .map(a -> prefix + a)

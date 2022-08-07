@@ -2,7 +2,7 @@ package de.mspark.jdaw.help;
 
 import java.util.List;
 
-import de.mspark.jdaw.core.DiscordAction;
+import de.mspark.jdaw.core.TextListenerAction;
 import de.mspark.jdaw.core.TextCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -14,10 +14,10 @@ import net.dv8tion.jda.api.entities.Message;
  * @author marcel
  */
 public class GlobalHelpCommand extends TextCommand {
-    private HelpConfig config;
-    private List<DiscordAction> allLoadedCmds;
+    private final HelpConfig config;
+    private List<TextListenerAction> allLoadedCmds;
 
-    public GlobalHelpCommand(List<DiscordAction> allLoadedCmds, HelpConfig config) {
+    public GlobalHelpCommand(List<TextListenerAction> allLoadedCmds, HelpConfig config) {
         this.allLoadedCmds = allLoadedCmds;
         this.config = config;
     }
@@ -29,12 +29,12 @@ public class GlobalHelpCommand extends TextCommand {
             allLoadedCmds.stream()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
                 .filter(cmd -> cmd.helpPageWithAliases(msg).isPresent())
-                .forEach(cmd -> eb.addField(cmd.getTrigger(), cmd.getShortDescription(), false));
+                .forEach(cmd -> eb.addField(cmd.trigger(), cmd.description(), false));
             msg.getChannel().sendMessageEmbeds(eb.build()).submit();
         } else {
             String wantedHelpPage = cmdArguments.get(0);
             allLoadedCmds.stream()
-                .filter(c -> c.getTrigger().equalsIgnoreCase(wantedHelpPage))
+                .filter(c -> c.trigger().equalsIgnoreCase(wantedHelpPage))
                 .findFirst()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
                 .flatMap(c -> c.helpPageWithAliases(msg))
@@ -57,5 +57,9 @@ public class GlobalHelpCommand extends TextCommand {
     @Override
     public boolean executableWihtoutArgs() {
         return true;
+    }
+    
+    public void setActions(List<TextListenerAction> actions) {
+        this.allLoadedCmds = actions;
     }
 }

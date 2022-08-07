@@ -2,11 +2,17 @@ package de.mspark.jdaw.core;
 
 import java.util.List;
 
+import de.mspark.jdaw.config.JDAManager;
+import de.mspark.jdaw.guilds.GuildConfigService;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-public abstract class TextCommand {
+interface RegisterObserver {
+    void onRegister(JDAManager registeredInstance, GuildConfigService guildConfig);
+}
+
+public abstract class TextCommand implements RegisterObserver, Invokable {
 
     /**
      * Specified the guild permission which this bot needs in order to execute the command.
@@ -27,12 +33,6 @@ public abstract class TextCommand {
         return new Permission[0];
     };
     
-    /**
-     * Main trigger. It is mandatory and is used for help page generation.
-     * @return
-     */
-    public abstract String trigger();
-
     public String[] aliases() {
         return new String[0];
     };
@@ -48,8 +48,6 @@ public abstract class TextCommand {
     public boolean executableWihtoutArgs() {
         return false;
     };
-    
-    public abstract String description();
 
     /**
      * Specifies if this command can be executed inside a private chat with the bot (typically this is the case when a command
@@ -80,6 +78,15 @@ public abstract class TextCommand {
      */
     public MessageEmbed commandHelpPage() {
         return null;
+    }
+    
+    /**
+     * 
+     * @param registeredInstance
+     * @param guildConfig
+     */
+    @Override
+    public void onRegister(JDAManager registeredInstance, GuildConfigService guildConfig) {
     }
     
 }
