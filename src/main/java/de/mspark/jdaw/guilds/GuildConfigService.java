@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import de.mspark.jdaw.config.JDAWConfig;
+import de.mspark.jdaw.startup.JDAWConfig;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;

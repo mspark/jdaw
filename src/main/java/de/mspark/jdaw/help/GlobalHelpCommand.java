@@ -2,8 +2,8 @@ package de.mspark.jdaw.help;
 
 import java.util.List;
 
-import de.mspark.jdaw.core.TextListenerAction;
-import de.mspark.jdaw.core.TextCommand;
+import de.mspark.jdaw.cmdapi.TextCommand;
+import de.mspark.jdaw.cmdapi.TextListenerAction;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 

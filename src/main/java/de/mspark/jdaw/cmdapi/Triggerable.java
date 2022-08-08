@@ -1,6 +1,6 @@
-package de.mspark.jdaw.core;
+package de.mspark.jdaw.cmdapi;
 
-public interface Invokable {
+public interface Triggerable {
     String trigger();
 
     String description();

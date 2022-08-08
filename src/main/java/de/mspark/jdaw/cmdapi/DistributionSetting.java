@@ -1,8 +1,8 @@
-package de.mspark.jdaw.core;
+package de.mspark.jdaw.cmdapi;
 
 import java.util.Arrays;
 
-import de.mspark.jdaw.config.JDAManager;
+import de.mspark.jdaw.startup.JDAManager;
 
 public enum DistributionSetting {
     /**

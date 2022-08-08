@@ -2,15 +2,15 @@ package de.mspark.jdaw.guilds;
 
 import java.util.List;
 
-import de.mspark.jdaw.config.JDAManager;
-import de.mspark.jdaw.core.DistributionSetting;
-import de.mspark.jdaw.core.TextCommand;
+import de.mspark.jdaw.cmdapi.DistributionSetting;
+import de.mspark.jdaw.cmdapi.TextCommand;
+import de.mspark.jdaw.startup.JDAManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-public class PrefixSetCommand extends TextCommand {
+class PrefixSetCommand extends TextCommand {
 
     private final GuildRepository repo;
     private final GuildPrefixFilter prefixFilter;

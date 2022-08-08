@@ -1,4 +1,4 @@
-package de.mspark.jdaw.config;
+package de.mspark.jdaw.startup;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +37,6 @@ public class JDAManager {
         return this.jdas[0];
     }
     
-    // TODO 
     public JDA[] getAllJdaRaw() {
         return jdas;
     }

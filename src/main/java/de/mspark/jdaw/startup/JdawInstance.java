@@ -1,4 +1,4 @@
-package de.mspark.jdaw.config;
+package de.mspark.jdaw.startup;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import de.mspark.jdaw.core.TextCommand;
-import de.mspark.jdaw.core.TextListenerAction;
+import de.mspark.jdaw.cmdapi.TextCommand;
+import de.mspark.jdaw.cmdapi.TextListenerAction;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.help.GlobalHelpCommand;
 import de.mspark.jdaw.help.HelpConfig;

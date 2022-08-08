@@ -1,4 +1,4 @@
-package de.mspark.jdaw.core;
+package de.mspark.jdaw.cmdapi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.mspark.jdaw.config.JDAManager;
 import de.mspark.jdaw.guilds.GuildConfigService;
+import de.mspark.jdaw.startup.JDAManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
  *
  * @author marcel
  */
-public final class TextListenerAction extends ListenerAdapter implements Invokable {
+public final class TextListenerAction extends ListenerAdapter implements Triggerable {
 
     private final TextCommand commandProperties;
     private final GuildConfigService guildConfig;

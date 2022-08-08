@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.mspark.jdaw.config.JDAManager;
-import de.mspark.jdaw.core.TextCommand;
+import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.guilds.GuildConfigService;
+import de.mspark.jdaw.startup.JDAManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;

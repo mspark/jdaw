@@ -2,7 +2,7 @@ package de.mspark.jdaw.maintainance;
 
 import java.util.List;
 
-import de.mspark.jdaw.core.TextCommand;
+import de.mspark.jdaw.cmdapi.TextCommand;
 import net.dv8tion.jda.api.entities.Message;
 
 public class PingCommand extends TextCommand {
