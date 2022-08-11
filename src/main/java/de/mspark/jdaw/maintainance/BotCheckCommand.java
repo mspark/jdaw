@@ -4,9 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.mspark.jdaw.cmdapi.JdawState;
 import de.mspark.jdaw.cmdapi.TextCommand;
-import de.mspark.jdaw.guilds.GuildConfigService;
-import de.mspark.jdaw.startup.JDAManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -14,7 +13,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-public class BotCheckCommand extends TextCommand {
+public class BotCheckCommand extends TextCommand  {
 
     private static class BotGuilds {
         private final JDA bot;
@@ -31,9 +30,10 @@ public class BotCheckCommand extends TextCommand {
     private JDA[] allBots;
 
     @Override
-    public void onRegister(JDAManager jdaManager, GuildConfigService guildConfig) {
-        this.allBots = jdaManager.getAllJdaRaw();
-    }
+    public void onJdaRegistration(JdawState stateOnRegistration) {
+        this.allBots = stateOnRegistration.jdaManager().getAllJdaRaw();
+    }    
+    
 
     @Override
     public String trigger() {

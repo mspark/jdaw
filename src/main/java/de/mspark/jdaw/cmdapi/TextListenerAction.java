@@ -20,10 +20,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
- * A new discord command wich has a top level command trigger and does somehting. The {@link TextCommand}
- * annotation is necessary for the concrecte implementation, in order to listen to events.
- *
+ * Decorator for {@link TextCommand}. It has the core functionality of a text command including permission management.
+ * 
  * @author marcel
+ * @see de.mspark.jdaw.cmdapi.TextCommand
  */
 public final class TextListenerAction extends ListenerAdapter implements Triggerable {
 
@@ -42,17 +42,16 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
         this.commandProperties = action;
     }
     
-    public void registerOn(JDAManager jdas) {
+    /**
+     * The action will listen on text events. 
+     * 
+     * @param jdas
+     */
+    public void startListenOnDiscordEvents(JDAManager jdas) {
         commandProperties.distributionSetting().applySetting(jdas, this);
-        commandProperties.onRegister(jdas, guildConfig);
+        commandProperties.onJdaRegistration(new JdawState(List.of(this), guildConfig, jdas));
     }
 
-    /**
-     * A short description what this command is for. It is shown in the global command overview inside a big message
-     * embeds.
-     * 
-     * @return
-     */
     public String description() {
         return commandProperties.description();
     }
@@ -89,7 +88,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
         return whitelist.isEmpty() || whitelist.contains(event.getChannel().getId());
     }
 
-    protected boolean matchesTrigger(Message msg) {
+    private boolean matchesTrigger(Message msg) {
         var arguments = getCmdArguments(msg);
         if (arguments.isEmpty())
             return false;
@@ -144,7 +143,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
         return true;
     }
 
-    protected final List<String> getCmdArguments(Message msg) {
+    private final List<String> getCmdArguments(Message msg) {
         String[] arguments = msg.getContentRaw().split("\\s+");
         String prefix = guildConfig.getPrefix(msg);
         if (arguments.length > 0 && arguments[0].startsWith(prefix)) {

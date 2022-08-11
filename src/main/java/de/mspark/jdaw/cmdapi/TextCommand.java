@@ -1,19 +1,14 @@
-package de.mspark.jdaw.core;
+package de.mspark.jdaw.cmdapi;
 
 import java.util.List;
 
-import de.mspark.jdaw.config.JDAManager;
-import de.mspark.jdaw.guilds.GuildConfigService;
+import de.mspark.jdaw.startup.JdawInstance;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-interface RegisterObserver {
-
-    void onRegister(JDAManager usedJdaManager, GuildConfigService usedGuildConfig);
-}
-
-public abstract class TextCommand implements RegisterObserver, Triggerable {
+public abstract class TextCommand implements Triggerable {
 
     /**
      * Specified the guild permission which this bot needs in order to execute the command.
@@ -85,12 +80,16 @@ public abstract class TextCommand implements RegisterObserver, Triggerable {
     }
 
     /**
+     * This method is invoked right after it was registered on a running {@link JDA} via {@link DistributionSetting}.
      * 
-     * @param registeredInstance
-     * @param guildConfig
+     * <br>
+     * The default implementation does nothing.
+     * 
+     * @param stateOnRegistration represents the state which was available during registration. The {@link JdawState#registeredActions()} only contains the action for this command.
+     * @see JdawInstance#register(TextCommand...)
      */
-    @Override
-    public void onRegister(JDAManager registeredInstance, GuildConfigService guildConfig) {
+    public void onJdaRegistration(JdawState stateOnRegistration) {
+        // for overriding in implementation
     }
 
 }

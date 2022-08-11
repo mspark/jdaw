@@ -1,16 +1,17 @@
 package de.mspark.jdaw.startup;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+import de.mspark.jdaw.cmdapi.JdawEventListener;
+import de.mspark.jdaw.cmdapi.JdawState;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.cmdapi.TextListenerAction;
 import de.mspark.jdaw.guilds.GuildConfigService;
-import de.mspark.jdaw.help.GlobalHelpCommand;
-import de.mspark.jdaw.help.HelpConfig;
 
 /**
  * Configured JDAW instance which holds all necessary configuration to start the a discord connection with configured 
@@ -27,26 +28,16 @@ import de.mspark.jdaw.help.HelpConfig;
  * @author marcel
  */
 public class JdawInstance {
-
+    
     private final JDAManager jdas;
     private final GuildConfigService guildConfig;
 
-    private Optional<GlobalHelpCommand> helpCommand = Optional.empty();
     private final List<TextListenerAction> registeredActions = new LinkedList<>();
+    private Collection<JdawEventListener> actionListeners = new HashSet<>();
 
     JdawInstance(JDAManager jdas, GuildConfigService guildConfig) {
-        this(jdas, guildConfig, null);
-    }
-
-    JdawInstance(JDAManager jdas, GuildConfigService guildConfig, HelpConfig config) {
         this.jdas = jdas;
         this.guildConfig = guildConfig;
-        if (config != null) {
-            var helpCommand = new GlobalHelpCommand(registeredActions, config);
-            this.helpCommand = Optional.of(helpCommand);
-            var helpAction = new TextListenerAction(guildConfig, helpCommand);
-            helpAction.registerOn(jdas);
-        }
     }
     
     /**
@@ -57,24 +48,25 @@ public class JdawInstance {
     public void register(TextCommand... cmds) {
         Stream.of(cmds).forEach(cmd -> {
             var action = new TextListenerAction(guildConfig, cmd);
-            action.registerOn(jdas);
+            action.startListenOnDiscordEvents(jdas);
+            var state = new JdawState(Collections.unmodifiableList(registeredActions), guildConfig, jdas);
+            actionListeners.forEach(listener -> listener.onNewRegistration(state, action));
             registeredActions.add(action);
         });
-        refreshGlobalHelpCmd();
     }
 
-    private void refreshGlobalHelpCmd() {
-        helpCommand.ifPresent(help -> help.setActions(Collections.unmodifiableList(registeredActions)));
-    }
-    
     /**
-     * Returns the registered text listener. The global help command is always missing (event if its configured). 
+     * Returns the registered text listener.
      * 
      * @return
      */
     public List<TextListenerAction> getRegisterdActions() {
         var list = new LinkedList<>(registeredActions);
         return list;
+    }
+    
+    public void addJdawEventListener(JdawEventListener listener) {
+        actionListeners.add(listener);
     }
 
 }

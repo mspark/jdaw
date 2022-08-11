@@ -14,8 +14,10 @@ import org.jooq.lambda.Unchecked;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.guilds.GuildRepository;
+import de.mspark.jdaw.help.GlobalHelpCommand;
 import de.mspark.jdaw.help.HelpConfig;
 import de.mspark.jdaw.maintainance.BotCheckCommand;
+import de.mspark.jdaw.maintainance.ListCommand;
 import de.mspark.jdaw.maintainance.PingCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -38,10 +40,10 @@ import net.dv8tion.jda.api.JDABuilder;
  */
 public class JdawInstanceBuilder {
 
-    private JDAWConfig conf;
-    private HelpConfig helpConfig;
+    private final JDAWConfig conf;
 
     private boolean loadDefaultCommands = true;
+    private Optional<HelpConfig> helpConfig = Optional.empty();
     private Optional<GuildRepository> repo = Optional.empty();
     private Collection<JDAConfigModifier> configModifiers = new LinkedList<>();
     private Collection<TextCommand> cmds = new ArrayList<>();
@@ -56,7 +58,7 @@ public class JdawInstanceBuilder {
     }
 
     public JdawInstanceBuilder enableHelpCommand(HelpConfig config) {
-        this.helpConfig = config;
+        this.helpConfig = Optional.of(config);
         return this;
     }
 
@@ -77,7 +79,7 @@ public class JdawInstanceBuilder {
      * @param cmd The command to add to the bot
      * @return builder
      */
-    public JdawInstanceBuilder addForRegister(TextCommand... cmd) {
+    public JdawInstanceBuilder addCommand(TextCommand... cmd) {
         this.cmds.addAll(List.of(cmd));
         return this;
     }
@@ -93,12 +95,11 @@ public class JdawInstanceBuilder {
             throw new IllegalStateException("No Discord API-Tokens found: Bean is present but has no values");
         }
         var jdas = configureDiscord();
-        var instance = new JdawInstance(new JDAManager(jdas), new GuildConfigService(conf, repo), helpConfig);
+        var instance = new JdawInstance(new JDAManager(jdas), new GuildConfigService(conf, repo));
         if (loadDefaultCommands) {
-            cmds.add(new PingCommand());
-            cmds.add(new BotCheckCommand());
-            instance.register(cmds.toArray(TextCommand[]::new));
+            configureDefaultCommands(instance);
         }
+        instance.register(cmds.toArray(TextCommand[]::new));
         return instance;
     }
 
@@ -108,4 +109,26 @@ public class JdawInstanceBuilder {
         var jdas = jdaBuilderList.stream().map(Unchecked.function(JDABuilder::build)).toArray(JDA[]::new);
         return jdas;
     }
+    
+    private void configureDefaultCommands(JdawInstance instance) {
+        configureHelpCommand(instance);
+        configureListCommand(instance);
+        cmds.add(new PingCommand());
+        cmds.add(new BotCheckCommand());
+    }
+
+    private void configureListCommand(JdawInstance instance) {
+        var listCmd = new ListCommand();
+        instance.addJdawEventListener(listCmd);
+        cmds.add(listCmd);
+    }
+
+    private void configureHelpCommand(JdawInstance instance) {
+        helpConfig.ifPresent(config -> {
+            var helpCommand = new GlobalHelpCommand(config);
+            instance.addJdawEventListener(helpCommand);
+            cmds.add(helpCommand);
+        });
+    }
+
 }

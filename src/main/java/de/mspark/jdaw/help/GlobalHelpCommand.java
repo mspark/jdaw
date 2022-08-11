@@ -1,7 +1,11 @@
 package de.mspark.jdaw.help;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
+import de.mspark.jdaw.cmdapi.JdawEventListener;
+import de.mspark.jdaw.cmdapi.JdawState;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.cmdapi.TextListenerAction;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -13,12 +17,14 @@ import net.dv8tion.jda.api.entities.Message;
  *
  * @author marcel
  */
-public class GlobalHelpCommand extends TextCommand {
+public class GlobalHelpCommand extends TextCommand implements JdawEventListener {
     private final HelpConfig config;
-    private List<TextListenerAction> allLoadedCmds;
+    private Collection<TextListenerAction> allLoadedCmds = new HashSet<>();
 
-    public GlobalHelpCommand(List<TextListenerAction> allLoadedCmds, HelpConfig config) {
-        this.allLoadedCmds = allLoadedCmds;
+    public GlobalHelpCommand(HelpConfig config) {
+        if (config == null) {
+            throw new IllegalArgumentException("Null help config is not allowed");
+        }
         this.config = config;
     }
 
@@ -59,7 +65,19 @@ public class GlobalHelpCommand extends TextCommand {
         return true;
     }
     
-    public void setActions(List<TextListenerAction> actions) {
-        this.allLoadedCmds = actions;
+    @Override
+    public void onNewRegistration(JdawState stateOnRegistrationAttempt, TextListenerAction newRegisteredAction) {
+        if (this.allLoadedCmds.isEmpty()) {
+            stateOnRegistrationAttempt.registeredActions().stream().forEach(this::addAction);
+        } else {
+            this.addAction(newRegisteredAction);
+        }
+
+    }
+    
+    private void addAction(TextListenerAction action) {
+        if (!action.trigger().equals(trigger())) {
+            this.allLoadedCmds.add(action);
+        }
     }
 }
