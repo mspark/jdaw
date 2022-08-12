@@ -1,8 +1,5 @@
-
-This project tries to provide an infrastructure for an easy and fast discord bot development. It is a library which provides a set of "standard" features which can be found in many self written discord bots.
-
-This project uses [JDA](https://github.com/DV8FromTheWorld/JDA) (java discord api implementation) and the [Spring Framework](https://spring.io/projects/spring-framework). 
-
+This project tries to provide an infrastructure for an easy and fast discord bot development. It is a library which provides a set of "standard" features for text commands which can be found in many self written discord bots.
+This project uses [JDA](https://github.com/DV8FromTheWorld/JDA) (java discord api implementation)
 
 It aims on simplifying the development of independent commands. It also has support for multiple bot tokens for balancing mechanisms.
 
@@ -14,74 +11,88 @@ It's a goal to make command development easier. By using JDAW you can write new 
 * [A global help command](../../wiki/Help-Command)
 * [Support for multiple discord tokens](../../Command-Balancing)
 * [Seperate guild configuration](../../wiki/Multiguild-Support) (different prefix per guild)
+* [View pre-installed maintenance commands](../../wiki/Preinstalled-Commands)
 
 Work in progress:
+* Enable Guild Prefix Command (again)
 * Slash command support
 
-Look in the [wiki](../../wiki) for furthor explanations!
+Have a look at the [wiki](../../wiki) for further explanations!
 An example discord bot which uses JDAW can be found in [this](https://github.com/mspark/example-jdaw) repository. 
 
 # Commands
 
-A single command is a spring bean and is provided when using the `@CommandProperties` annotation. A very simple command can look like this:
+A command is written by extending the `TextCommand` interface. A very simple command can look like this:
 
 ```java
-@CommandProperties(trigger = "test", description = "Demonstration of different JDA execution", userGuildPermissions = Permission.MANAGE_SERVER)
-public class MyFancyCommand extends Command {
+class HelloWorldCmd extends TextCommand {
 
     @Override
-    public void doActionOnCmd(Message msg, List<String> cmdArguments) {
-    	// your action
+    public String trigger() {
+        return "hello";
     }
-}
 
+    @Override
+    public String description() {
+        return "Prints hello world";
+    }
+
+    @Override
+    public void onTrigger(Message msg, List<String> cmdArguments) {
+		  msg.reply("Hello World").submit();        
+    }
+
+}
 ```
+
 The command is now executed when all of these conditions are met:
 * text starts with prefix (like `!`)
-* text starts with command trigger
-* user has enough permissions (you need to configure this)
-* bot has enough permissions
+* text starts with command trigger ("hello")
+* user has enough permissions (nothing configured here)
+* bot has enough permissions (nothing configured here)
 
 Further explanation with an example can be found [in the wiki](../../wiki/Writing-Commands). 
 
-# Setup
-**The easiest way to use JDAW is by using Spring-Boot** . The JDA configuration (discord login etc.) is done via bean configuration, thus you need to enable the `ComponentScan` on the package `de.mspark.jdaw`. If you don't want the default command you can exclude the package `de.mspark.jdaw.commands` (see [Preinstalled Commands](../../wiki/Preinstalled-Commands))
+# Quickstart
+1. Implement the `JDAWConfig` interface. 
+2. Use the `JdawInstanceBuilder` and set the `JDAWConfig`
+3. Register written implementation of `TextCommand`
+4. Start instance
 
-
-**Example for main class:**
-
-```java
-@SpringBootApplication
-@ComponentScan({"de.mspark.jdaw", "own.package"})
-public class Application {
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
-}
-
-````
-In addition to that, you have to implement the `JDAWConfig` interface to configure your application. You can do this directly by providing a bean (or load it from your application.properties). 
+## JDAWConfig
 
 ```java
-@Bean
-public JDAWConfig jdawConfig() {
+public static JDAWConfig jdawConfig() {
     return new JDAWConfig() {
-            
+
         @Override
-        public String prefix() {
-            return "$";
+        public String defaultPrefix() {
+            return "!";
         }
-       
+
         @Override
         public String[] apiTokens() {
-            return new String []{ "", "" /* tokens here - first is main*/ };
+            return new String[] { "MAIN API TOKEN", "BOOSTER API TOKEN" };
         }
     };
 }
 ```
+    
+## Build Instance
+```java
+public static void main(String[] args) {
+    new JdawInstanceBuilder(jdawConfig())
+        .addForRegister(new HelloWorldCmd())
+        .buildJdawInstance();
+}
+```
 
-You can modify the JDA bot configuration by providing beans for `JDAConfigurationVisitor` too. Have a look at the [JDAW Configuration page](../../wiki/JDAW-Configuration) if you have need for this (when you want to cache members etc.). 
+## Further configuration
+
+- You can disable the default commands via the instance builder, (see [Pre-installed Commands](../../wiki/Preinstalled-Commands))
+- Enable the help command by providing a help configuration, see [Help Command Wiki](../../wiki/Help-Command). 
+- You can modify the JDA (instance of a discord bot) by setting a `JDAConfigModifier` , see [JDAW Configuration page](../../wiki/JDAW-Configuration)
+- You can listen to JDAW Events by providing a `JDAWEventListener`. By default all text commands can listen to JDAW events.
 
 # Use JDAW
 The JDAW package is not published in the maven central repository. Currently it is only available via github packages. In order to use this you need to configure your maven according to the offical [github documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token). In the end you need something like this in your `~/.m2/settings.xml`:
@@ -109,7 +120,6 @@ In your project pom you need to add the distribution management:
 </distributionManagement>
 ```
 
-### Only JDAW
 Now you can add the dependency to JDAW.
 
 ```
@@ -117,20 +127,12 @@ Now you can add the dependency to JDAW.
   <dependency>
     <groupId>de.mspark.de</groupId>
     <artifactId>jdaw</artifactId>
-    <version>3.0</version>
+    <version>6.0</version>
   </dependency>
 </dependencies>
 
 ```
-
-### Spring Boot with JDAW
-If you want to use spring boot, you can use the maintained spring-boot-parent instead of adding the JDAW dependency:
-
-```
-<parent>
-	<groupId>de.mspark.jdaw</groupId>
-	<artifactId>jdaw-spring-boot</artifactId>
-	<version>3.0</version>
-</parent>
-```
 Get the latest version from the Githubs-Packages. See https//github.com/mspark/jdaw/packages/1115525
+
+# Spring Migration
+TODO
