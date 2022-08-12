@@ -56,7 +56,7 @@ public class BotCheckCommand extends TextCommand  {
     }
 
     @Override
-    public void doActionOnTrigger(Message msg, List<String> cmdArguments) {
+    public void onTrigger(Message msg, List<String> cmdArguments) {
         checkPowerUps(msg);
     }
 

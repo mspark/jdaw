@@ -38,7 +38,7 @@ public class ListCommand extends TextCommand implements JdawEventListener {
     }
 
     @Override
-    public void doActionOnTrigger(Message msg, List<String> cmdArguments) {
+    public void onTrigger(Message msg, List<String> cmdArguments) {
         Optional<String> triggerListText = allLoadedCmds.stream()
                 .map(t -> t.trigger() + " | Aliases: " + Arrays.toString(t.aliases()))
                 .reduce((a, b) -> a + "\n" + b);

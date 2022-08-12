@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 public class PingCommand extends TextCommand {
 
     @Override
-    public void doActionOnTrigger(Message msg, List<String> cmdArguments) {
+    public void onTrigger(Message msg, List<String> cmdArguments) {
         msg.reply("pong").submit();
     }
 

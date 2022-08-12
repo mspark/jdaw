@@ -8,13 +8,15 @@ import de.mspark.jdaw.cmdapi.JdawEventListener;
 import de.mspark.jdaw.cmdapi.JdawState;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.cmdapi.TextListenerAction;
+import de.mspark.jdaw.startup.JdawInstanceBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 
 /**
- * When implementing this with the {@link EnableHelpCommand} Annotation, a help command for all sub commands will be
- * available.
- *
+ * Command which generates a help page for all commands (in case they provide a configured help page).
+ * 
+ * @see {@link JdawInstanceBuilder#enableHelpCommand(HelpConfig)}
+ * @see TextCommand#commandHelpPage()
  * @author marcel
  */
 public class GlobalHelpCommand extends TextCommand implements JdawEventListener {
@@ -29,7 +31,7 @@ public class GlobalHelpCommand extends TextCommand implements JdawEventListener 
     }
 
     @Override
-    public void doActionOnTrigger(Message msg, List<String> cmdArguments) {
+    public void onTrigger(Message msg, List<String> cmdArguments) {
         if (cmdArguments.isEmpty()) {
             var eb = new EmbedBuilder().setTitle(config.botName()).setDescription(config.botDescription());
             allLoadedCmds.stream()

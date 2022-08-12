@@ -8,6 +8,11 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
+/**
+ * Specification of text command. The {@link Triggerable} interface specifies the invocation conditions.
+ *
+ * @author marcel
+ */
 public abstract class TextCommand implements Triggerable {
 
     /**
@@ -62,15 +67,6 @@ public abstract class TextCommand implements Triggerable {
     }
 
     /**
-     * The action which is executed when the command matches.
-     * 
-     * @param event
-     * @param cmd   The list of addiotional arguments of the command. The trigger itself is not present. May be empty
-     *              when no arguments were given.
-     */
-    public abstract void doActionOnTrigger(Message msg, List<String> cmdArguments);
-
-    /**
      * Help page for the command (typically explains all sub-commands).
      * 
      * @return Can be null when no help page for the command is desired otherwise it must contain a printable embed
@@ -89,7 +85,17 @@ public abstract class TextCommand implements Triggerable {
      * @see JdawInstance#register(TextCommand...)
      */
     public void onJdaRegistration(JdawState stateOnRegistration) {
-        // for overriding in implementation
+        return;
     }
+    
+    /**
+     * Is invoked when Trigger and all configured options like permissions and chat type are matching. 
+     * 
+     * @param msg Invocation message event.
+     * @param cmd   The list of addiotional arguments of the command. The trigger itself is not present. May be empty
+     *              when no arguments were given.
+     * @see TextListenerAction
+     */
+    public abstract void onTrigger(Message msg, List<String> cmdArguments);
 
 }

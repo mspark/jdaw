@@ -114,7 +114,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
     private void invokeWithArguments(MessageReceivedEvent event, List<String> arguments) {
         boolean enoughArguments = commandProperties.executableWihtoutArgs() || arguments.size() >= 1;
         if (enoughArguments) {
-            commandProperties.doActionOnTrigger(event.getMessage(), arguments);
+            commandProperties.onTrigger(event.getMessage(), arguments);
         } else {
             event.getChannel().sendMessage("Zu wenig Argumente!. Benutze den help befehl").submit();
         }

@@ -4,7 +4,14 @@ import java.util.Arrays;
 
 import de.mspark.jdaw.startup.JDAManager;
 
+/**
+ * Provides setting options for the way commands are distributed to the respective JDA instances. <br>
+ * The respective setting determines which Discord bots (one bot per API token) notify on a {@link TextListenerAction}.
+ * 
+ * @author marcel
+ */
 public enum DistributionSetting {
+
     /**
      * Only the main bot listens to text commands.
      */
@@ -36,5 +43,11 @@ public enum DistributionSetting {
         }
     };
 
+    /**
+     * Adopts the setting of the current distribution setting directly on the JDA.
+     * 
+     * @param jdas
+     * @param listener
+     */
     public abstract void applySetting(JDAManager jdas, TextListenerAction listener);
 }

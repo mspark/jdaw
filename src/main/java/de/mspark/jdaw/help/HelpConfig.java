@@ -1,9 +1,11 @@
 package de.mspark.jdaw.help;
 
+import de.mspark.jdaw.startup.JdawInstanceBuilder;
 
 /**
- * By providing this interface, a help page generator is provided. 
+ * Provides meta information about the whole JDAW Instance. This is used for enabling the {@link GlobalHelpCommand}.
  * 
+ * @see JdawInstanceBuilder#enableHelpCommand(HelpConfig)
  * @author marcel
  */
 public interface HelpConfig {

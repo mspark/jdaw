@@ -3,20 +3,9 @@ package de.mspark.jdaw.startup;
 import de.mspark.jdaw.cmdapi.TextCommand;
 
 /** 
- * Provides basic information in order to run JDAW. Must be implemented and then scanned by spring. For example
- * 
- * <code>
-    \@Bean
-    public JDAWConfig jdawConfig() {
-        return new JDAWConfig() {
-        // .......
-        };
-    }
- * </code>
- * 
+ * Provides basic information in order to run JDAW. 
  * 
  * @author marcel
- *
  */
 public interface JDAWConfig {
     

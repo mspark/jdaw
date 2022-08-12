@@ -5,6 +5,7 @@ import de.mspark.jdaw.startup.JdawInstance;
 /**
  * Event listener for Events which happen in {@link TextListenerAction} and {@link JdawInstance}.
  * 
+ * @see JdawInstance#addJdawEventListener(JdawEventListener)
  * @author marcel
  */
 public interface JdawEventListener {
