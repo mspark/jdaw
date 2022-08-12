@@ -74,7 +74,7 @@ public class JdawInstanceBuilder {
 
     /**
      * Add a text command event listener to the JdawInstance. The register action takes place during build, see
-     * {@link #buildJdawInstance()}.
+     * {@link #buildJdawInstance()}. Each command is also added as event listener.
      * 
      * @param cmd The command to add to the bot
      * @return builder
@@ -99,7 +99,9 @@ public class JdawInstanceBuilder {
         if (loadDefaultCommands) {
             configureDefaultCommands(instance);
         }
-        instance.register(cmds.toArray(TextCommand[]::new));
+        var cmdArray = cmds.toArray(TextCommand[]::new);
+        instance.addJdawEventListener(cmdArray);
+        instance.register(cmds.toArray(cmdArray));
         return instance;
     }
 

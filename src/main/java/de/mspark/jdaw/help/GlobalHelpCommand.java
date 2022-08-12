@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import de.mspark.jdaw.cmdapi.JdawEventListener;
 import de.mspark.jdaw.cmdapi.JdawState;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.cmdapi.TextListenerAction;
@@ -19,7 +18,7 @@ import net.dv8tion.jda.api.entities.Message;
  * @see TextCommand#commandHelpPage()
  * @author marcel
  */
-public class GlobalHelpCommand extends TextCommand implements JdawEventListener {
+public class GlobalHelpCommand extends TextCommand  {
     private final HelpConfig config;
     private Collection<TextListenerAction> allLoadedCmds = new HashSet<>();
 
@@ -69,12 +68,7 @@ public class GlobalHelpCommand extends TextCommand implements JdawEventListener 
     
     @Override
     public void onNewRegistration(JdawState stateOnRegistrationAttempt, TextListenerAction newRegisteredAction) {
-        if (this.allLoadedCmds.isEmpty()) {
-            stateOnRegistrationAttempt.registeredActions().stream().forEach(this::addAction);
-        } else {
-            this.addAction(newRegisteredAction);
-        }
-
+        addAction(newRegisteredAction);
     }
     
     private void addAction(TextListenerAction action) {

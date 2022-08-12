@@ -9,11 +9,11 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 /**
- * Specification of text command. The {@link Triggerable} interface specifies the invocation conditions.
+ * Specification of text command. The {@link Triggerable} interface specifies the invocation conditions. 
  *
  * @author marcel
  */
-public abstract class TextCommand implements Triggerable {
+public abstract class TextCommand extends JdawEventListener implements Triggerable {
 
     /**
      * Specified the guild permission which this bot needs in order to execute the command.

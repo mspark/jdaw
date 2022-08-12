@@ -1,5 +1,6 @@
 package de.mspark.jdaw.startup;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -65,8 +66,8 @@ public class JdawInstance {
         return list;
     }
     
-    public void addJdawEventListener(JdawEventListener listener) {
-        actionListeners.add(listener);
+    public void addJdawEventListener(JdawEventListener... listener) {
+        actionListeners.addAll(Arrays.asList(listener));
     }
 
 }

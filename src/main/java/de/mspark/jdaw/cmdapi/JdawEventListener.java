@@ -8,7 +8,7 @@ import de.mspark.jdaw.startup.JdawInstance;
  * @see JdawInstance#addJdawEventListener(JdawEventListener)
  * @author marcel
  */
-public interface JdawEventListener {
+public abstract class JdawEventListener {
     
     
     // IDEAS
@@ -23,5 +23,5 @@ public interface JdawEventListener {
      * @param newRegisteredAction The new registered command (it already listens to discord events) 
      * @see JdawInstance#register(TextCommand...)
      */
-    public void onNewRegistration(JdawState stateOnRegistrationAttempt, TextListenerAction newRegisteredAction);
+    public void onNewRegistration(JdawState stateOnRegistrationAttempt, TextListenerAction newRegisteredAction) {};
 }
