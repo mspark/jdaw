@@ -7,8 +7,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.mspark.jdaw.guilds.GuildConfigService;
+import de.mspark.jdaw.guilds.GuildSettingsFinder;
 import de.mspark.jdaw.startup.JDAManager;
+import de.mspark.jdaw.startup.JDAWConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -25,10 +26,11 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
  * @author marcel
  * @see de.mspark.jdaw.cmdapi.TextCommand
  */
-public final class TextListenerAction extends ListenerAdapter implements Triggerable {
+public final class TextListenerAction extends ListenerAdapter {
 
     private final TextCommand commandProperties;
-    private final GuildConfigService guildConfig;
+    private final GuildSettingsFinder guildConfig;
+    private final JDAWConfig jdawConfig;
 
     /**
      * Defines a command. {@link TextCommand} is necessary to define properties.
@@ -37,9 +39,10 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
      * @param guilConfig
      * @param balanceSetting
      */
-    public TextListenerAction(GuildConfigService guildConfig, TextCommand action) {
-        this.guildConfig = guildConfig;
-        this.commandProperties = action;
+    public TextListenerAction(JdawState state, TextCommand commandDefinition) {
+        this.guildConfig = state.guildConfig();
+        this.commandProperties = commandDefinition;
+        this.jdawConfig = state.globalConfig();
     }
     
     /**
@@ -49,7 +52,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
      */
     public void startListenOnDiscordEvents(JDAManager jdas) {
         commandProperties.distributionSetting().applySetting(jdas, this);
-        commandProperties.onJdaRegistration(new JdawState(List.of(this), guildConfig, jdas));
+        commandProperties.onJdaRegistration(new JdawState(List.of(this), guildConfig, jdas, jdawConfig));
     }
 
     public String description() {
@@ -70,7 +73,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
             var arguments = getCmdArguments(event.getMessage());
             if (matchesTrigger(event.getMessage())) {
                 arguments.remove(0);
-                invoke(event, arguments);
+                invokeOnTrigger(event.getMessage(), arguments);
             }
         }
     }
@@ -84,7 +87,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
     }
 
     private boolean isChannelAllowed(MessageReceivedEvent event) {
-        var whitelist = guildConfig.getWhitelistChannel(event);
+        var whitelist = guildConfig.getWhitelistChannel(event.getMessage());
         return whitelist.isEmpty() || whitelist.contains(event.getChannel().getId());
     }
 
@@ -97,11 +100,11 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
         allTrigger.add(trigger());
         return allTrigger.stream().filter(t -> cmd.equalsIgnoreCase(t)).findAny().isPresent();
     }
-
-    private void invoke(MessageReceivedEvent event, List<String> arguments) {
+    
+    private void invokeOnTrigger(Message event, List<String> arguments) {
         if (!globalBotAdminCheck(event.getAuthor())) {
             event.getAuthor().openPrivateChannel().complete().sendMessage("You are not allowed to invoke this command")
-                .submit();
+            .submit();
             return;
         }
         if (event.isFromType(ChannelType.PRIVATE)) {
@@ -109,18 +112,19 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
         } else if (permissionCheck(event)) {
             invokeWithArguments(event, arguments);
         }
+        
     }
 
-    private void invokeWithArguments(MessageReceivedEvent event, List<String> arguments) {
+    private void invokeWithArguments(Message event, List<String> arguments) {
         boolean enoughArguments = commandProperties.executableWihtoutArgs() || arguments.size() >= 1;
         if (enoughArguments) {
-            commandProperties.onTrigger(event.getMessage(), arguments);
+            commandProperties.onTrigger(event, arguments);
         } else {
             event.getChannel().sendMessage("Zu wenig Argumente!. Benutze den help befehl").submit();
         }
     }
 
-    private boolean permissionCheck(MessageReceivedEvent event) {
+    private boolean permissionCheck(Message event) {
         var permsMissingUser = extractMissingPermission(commandProperties.userGuildPermissions(),
             event.getMember().getPermissions());
         Member ownUser = event.getGuild().getSelfMember();
@@ -145,7 +149,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
 
     private final List<String> getCmdArguments(Message msg) {
         String[] arguments = msg.getContentRaw().split("\\s+");
-        String prefix = guildConfig.getPrefix(msg);
+        String prefix = triggerPrefix(msg);
         if (arguments.length > 0 && arguments[0].startsWith(prefix)) {
             arguments[0] = arguments[0].substring(prefix.length());
         }
@@ -168,7 +172,7 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
 
     private boolean globalBotAdminCheck(User u) {
         if (commandProperties.botAdminOnly()) {
-            return Arrays.stream(guildConfig.globalConfig().botAdmins()).anyMatch(ba -> ba.equals(u.getId()));
+            return Arrays.stream(jdawConfig.botAdmins()).anyMatch(ba -> ba.equals(u.getId()));
         }
         return true;
     }
@@ -184,13 +188,17 @@ public final class TextListenerAction extends ListenerAdapter implements Trigger
             List<String> allTrigger = new ArrayList<String>();
             allTrigger.add(trigger());
             allTrigger.addAll(List.of(aliases()));
-            String prefix = guildConfig.getPrefix(msg);
+            String prefix = triggerPrefix(msg);
             String aliasAppendix = allTrigger.stream()
                 .map(a -> prefix + a)
                 .collect(Collectors.joining(", "));
             emb.setFooter("Aliases: " + aliasAppendix);
         }
         return emb;
+    }
+    
+    private String triggerPrefix(Message msg) {
+        return guildConfig.retrieveGuildPrefix(msg).orElse(jdawConfig.defaultPrefix());
     }
 
 }

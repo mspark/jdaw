@@ -8,13 +8,12 @@ import java.util.Optional;
 import de.mspark.jdaw.cmdapi.JdawState;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.cmdapi.TextListenerAction;
-import de.mspark.jdaw.cmdapi.Triggerable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 
 public class ListCommand extends TextCommand {
 
-    private List<Triggerable> allLoadedCmds = new LinkedList<>();
+    private List<TextListenerAction> allLoadedCmds = new LinkedList<>();
 
     @Override
     public String trigger() {

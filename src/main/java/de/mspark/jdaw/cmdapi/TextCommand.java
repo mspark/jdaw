@@ -9,11 +9,46 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 /**
- * Specification of text command. The {@link Triggerable} interface specifies the invocation conditions. 
+ * Specification of text command. 
  *
  * @author marcel
  */
-public abstract class TextCommand extends JdawEventListener implements Triggerable {
+public abstract class TextCommand extends JdawEventListener  {
+    
+    /**
+     * A literal which specifies an invocation trigger.
+     * 
+     * @return
+     */
+    public abstract String trigger();
+
+    /**
+     * A short description what this command is for. It is shown in the global command overview inside a big message
+     * embeds.
+     * 
+     * @return
+     */
+    public abstract String description();
+
+    /**
+     * Aliases for {@link #trigger()}. They can be used instead of the trigger itself to invoke a command.
+     * 
+     * @return
+     */
+    public String[] aliases() {
+        return new String[0];
+    };
+
+    /**
+     * Is invoked when Trigger and all configured options like permissions and chat type are matching.
+     * 
+     * @param msg Invocation message event.
+     * @param cmd The list of addiotional arguments of the command. The trigger itself is not present. May be empty when
+     *            no arguments were given.
+     * @see TextListenerAction
+     * @see TextCommand
+     */
+    public abstract void onTrigger(Message msg, List<String> cmdArguments);
 
     /**
      * Specified the guild permission which this bot needs in order to execute the command.
@@ -33,10 +68,6 @@ public abstract class TextCommand extends JdawEventListener implements Triggerab
      */
     public Permission[] userGuildPermissions() {
         return new Permission[0];
-    };
-
-    public String[] aliases() {
-        return new String[0];
     };
 
     /**
@@ -88,14 +119,4 @@ public abstract class TextCommand extends JdawEventListener implements Triggerab
         return;
     }
     
-    /**
-     * Is invoked when Trigger and all configured options like permissions and chat type are matching. 
-     * 
-     * @param msg Invocation message event.
-     * @param cmd   The list of addiotional arguments of the command. The trigger itself is not present. May be empty
-     *              when no arguments were given.
-     * @see TextListenerAction
-     */
-    public abstract void onTrigger(Message msg, List<String> cmdArguments);
-
 }

@@ -12,7 +12,7 @@ import de.mspark.jdaw.cmdapi.JdawEventListener;
 import de.mspark.jdaw.cmdapi.JdawState;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.cmdapi.TextListenerAction;
-import de.mspark.jdaw.guilds.GuildConfigService;
+import de.mspark.jdaw.guilds.GuildSettingsFinder;
 
 /**
  * Configured JDAW instance which holds all necessary configuration to start the a discord connection with configured 
@@ -31,14 +31,16 @@ import de.mspark.jdaw.guilds.GuildConfigService;
 public class JdawInstance {
     
     private final JDAManager jdas;
-    private final GuildConfigService guildConfig;
+    private final GuildSettingsFinder guildConfig;
+    private final JDAWConfig globalConfig;
 
     private final List<TextListenerAction> registeredActions = new LinkedList<>();
     private Collection<JdawEventListener> actionListeners = new HashSet<>();
 
-    JdawInstance(JDAManager jdas, GuildConfigService guildConfig) {
+    JdawInstance(JDAManager jdas, GuildSettingsFinder guildConfig, JDAWConfig globalConfig) {
         this.jdas = jdas;
         this.guildConfig = guildConfig;
+        this.globalConfig = globalConfig;
     }
     
     /**
@@ -48,12 +50,16 @@ public class JdawInstance {
      */
     public void register(TextCommand... cmds) {
         Stream.of(cmds).forEach(cmd -> {
-            var action = new TextListenerAction(guildConfig, cmd);
+            var stateBeforeRegistration = createCurrentState();
+            var action = new TextListenerAction(stateBeforeRegistration, cmd);
             action.startListenOnDiscordEvents(jdas);
-            var state = new JdawState(Collections.unmodifiableList(registeredActions), guildConfig, jdas);
-            actionListeners.forEach(listener -> listener.onNewRegistration(state, action));
+            actionListeners.forEach(listener -> listener.onNewRegistration(stateBeforeRegistration, action));
             registeredActions.add(action);
         });
+    }
+    
+    private JdawState createCurrentState() {
+        return new JdawState(Collections.unmodifiableList(registeredActions), guildConfig, jdas, globalConfig);
     }
 
     /**
