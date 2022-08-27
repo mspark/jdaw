@@ -12,8 +12,9 @@ import java.util.stream.Stream;
 import org.jooq.lambda.Unchecked;
 
 import de.mspark.jdaw.cmdapi.TextCommand;
-import de.mspark.jdaw.guilds.GuildConfigService;
 import de.mspark.jdaw.guilds.GuildRepository;
+import de.mspark.jdaw.guilds.GuildSettingsFinder;
+import de.mspark.jdaw.guilds.PrefixSetCommand;
 import de.mspark.jdaw.help.GlobalHelpCommand;
 import de.mspark.jdaw.help.HelpConfig;
 import de.mspark.jdaw.maintainance.BotCheckCommand;
@@ -52,7 +53,12 @@ public class JdawInstanceBuilder {
         this.conf = config;
     }
 
-    public JdawInstanceBuilder enableGuildConfigurations(GuildRepository repo) {
+    /**
+     * Enable guild 
+     * @param repo
+     * @return
+     */
+    public JdawInstanceBuilder enableGuildSpecificSettings(GuildRepository repo) {
         this.repo = of(repo);
         return this;
     }
@@ -83,7 +89,7 @@ public class JdawInstanceBuilder {
         this.cmds.addAll(List.of(cmd));
         return this;
     }
-
+    
     /**
      * Starts JDAW with all configured options. The discord bot is logged in and all {@link TextCommand} listen on their
      * trigger.
@@ -94,8 +100,9 @@ public class JdawInstanceBuilder {
         if (conf.apiTokens() == null || conf.apiTokens().length == 0) {
             throw new IllegalStateException("No Discord API-Tokens found: Bean is present but has no values");
         }
-        var jdas = configureDiscord();
-        var instance = new JdawInstance(new JDAManager(jdas), new GuildConfigService(conf, repo));
+        var jdaManager = configureDiscord();
+        var guildConfig = new GuildSettingsFinder(repo);
+        var instance = new JdawInstance(jdaManager, guildConfig, conf);
         if (loadDefaultCommands) {
             configureDefaultCommands(instance);
         }
@@ -105,23 +112,30 @@ public class JdawInstanceBuilder {
         return instance;
     }
 
-    private JDA[] configureDiscord() {
+    private JDAManager configureDiscord() {
         List<JDABuilder> jdaBuilderList = Stream.of(conf.apiTokens()).map(JDABuilder::createDefault).toList();
         jdaBuilderList.forEach(a -> configModifiers.forEach(j -> j.modify(a)));
         var jdas = jdaBuilderList.stream().map(Unchecked.function(JDABuilder::build)).toArray(JDA[]::new);
-        return jdas;
+        return new JDAManager(jdas);
     }
     
     private void configureDefaultCommands(JdawInstance instance) {
         configureHelpCommand(instance);
         configureListCommand(instance);
+        configurePrefixCommand(instance);
         cmds.add(new PingCommand());
         cmds.add(new BotCheckCommand());
     }
 
+    private void configurePrefixCommand(JdawInstance instance) {
+        repo.ifPresent(r -> {
+            var prefixCmd = new PrefixSetCommand(r, a -> Optional.of(a) /* TODO */);
+            cmds.add(prefixCmd);
+        });
+    }
+
     private void configureListCommand(JdawInstance instance) {
         var listCmd = new ListCommand();
-        instance.addJdawEventListener(listCmd);
         cmds.add(listCmd);
     }
 
