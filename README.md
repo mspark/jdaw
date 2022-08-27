@@ -59,31 +59,54 @@ Further explanation with an example can be found [in the wiki](../../wiki/Writin
 3. Register written implementation of `TextCommand`
 4. Start instance
 
-## JDAWConfig
+
+Example:
 
 ```java
-public static JDAWConfig jdawConfig() {
-    return new JDAWConfig() {
+class TestCommand extends TextCommand {
 
-        @Override
-        public String defaultPrefix() {
-            return "!";
-        }
+    @Override
+    public String trigger() {
+        return "test";
+    }
 
-        @Override
-        public String[] apiTokens() {
-            return new String[] { "MAIN API TOKEN", "BOOSTER API TOKEN" };
+    @Override
+    public String description() {
+        return "Test command";
+    }
+
+    @Override
+    public void onTrigger(Message msg, List<String> cmdArguments) {
+        if (cmdArguments.get(0).equalsIgnoreCase("hallo")) { // will trigger on ?test hallo
+            msg.reply("hallo!").submit();
+        } else {
+            msg.reply("You invoked test without arguments").submit();
         }
-    };
+    }
+
 }
-```
+
+class OwnJdawConfig implements JDAWConfig {
+
+    @Override
+    public String defaultPrefix() {
+        return "?";
+    }
+
+    @Override
+    public String[] apiTokens() {
+        return new String[] { "MAIN API TOKEN", "BOOSTER API TOKEN" };
+    }
     
-## Build Instance
-```java
-public static void main(String[] args) {
-    new JdawInstanceBuilder(jdawConfig())
-        .addForRegister(new HelloWorldCmd())
-        .buildJdawInstance();
+}
+
+public class App {
+    
+    public static void main(String[] args) {
+        new JdawInstanceBuilder(new OwnJdawConfig())
+            .addCommand(new TestCommand())
+            .buildJdawInstance();
+    }
 }
 ```
 
