@@ -22,6 +22,7 @@ import de.mspark.jdaw.maintainance.ListCommand;
 import de.mspark.jdaw.maintainance.PingCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 
 /**
  * Builder for a {@link JdawInstance}. It configures the instance with all possible
@@ -113,7 +114,13 @@ public class JdawInstanceBuilder {
     }
 
     private JDAManager configureDiscord() {
-        List<JDABuilder> jdaBuilderList = Stream.of(conf.apiTokens()).map(JDABuilder::createDefault).toList();
+        var priviledgedIntents = List.of(
+                GatewayIntent.GUILD_MESSAGES, 
+                GatewayIntent.MESSAGE_CONTENT, 
+                GatewayIntent.GUILD_MEMBERS);
+        List<JDABuilder> jdaBuilderList = Stream.of(conf.apiTokens())
+                .map(token -> JDABuilder.createDefault(token, priviledgedIntents))
+                .toList();
         jdaBuilderList.forEach(a -> configModifiers.forEach(j -> j.modify(a)));
         var jdas = jdaBuilderList.stream().map(Unchecked.function(JDABuilder::build)).toArray(JDA[]::new);
         return new JDAManager(jdas);
