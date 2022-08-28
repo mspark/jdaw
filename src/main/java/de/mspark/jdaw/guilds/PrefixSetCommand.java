@@ -16,16 +16,22 @@ public class PrefixSetCommand extends TextCommand {
     private final GuildSettingsFinder settingsFinder;
     private final GuildPrefixFilter prefixFilter;
 
-    public PrefixSetCommand(GuildRepository repo, GuildPrefixFilter filter) {
+    public PrefixSetCommand(GuildRepository repo) {
         this.repo = repo;
-        this.prefixFilter = filter;
+        this.prefixFilter = requestedNewPrefix -> {
+            boolean containsIllegalCharacter = requestedNewPrefix.startsWith(" ");
+            return !containsIllegalCharacter;
+        };
         this.settingsFinder = new GuildSettingsFinder(Optional.of(repo));
     }
 
     @Override
     public void onTrigger(Message msg, List<String> cmdArguments) {
-        prefixFilter.filter(cmdArguments.get(0))
-            .ifPresentOrElse(p -> setPrefix(msg, p), () -> msg.reply("Invalid prefix").submit());
+        if (prefixFilter.isAllowed(cmdArguments.get(0))) {
+            setPrefix(msg, cmdArguments.get(0).stripTrailing());
+        } else {
+            msg.reply("Invalid prefix").submit();
+        }
     }
 
     private void setPrefix(Message msg, String newPrefix) {
