@@ -39,7 +39,7 @@ class HelloWorldCmd extends TextCommand {
 
     @Override
     public void onTrigger(Message msg, List<String> cmdArguments) {
-		  msg.reply("Hello World").submit();        
+        msg.reply("Hello World").submit();        
     }
 
 }
@@ -54,13 +54,13 @@ The command is now executed when all of these conditions are met:
 Further explanation with an example can be found [in the wiki](../../wiki/Writing-Commands). 
 
 # Quickstart
-1. Implement the `JDAWConfig` interface. 
-2. Use the `JdawInstanceBuilder` and set the `JDAWConfig`
+1. Implement the `JdawConfig` interface. 
+2. Use the `JdawInstanceBuilder` and set the `JdawConfig`
 3. Register written implementation of `TextCommand`
 4. Start instance
 
 
-Example:
+Short runnable Example:
 
 ```java
 class TestCommand extends TextCommand {
@@ -86,7 +86,7 @@ class TestCommand extends TextCommand {
 
 }
 
-class OwnJdawConfig implements JDAWConfig {
+class OwnJdawConfig implements JdawConfig {
 
     @Override
     public String defaultPrefix() {
@@ -110,7 +110,10 @@ public class App {
 }
 ```
 
-## Further configuration
+You determine a lot of behaviour by overriding methods from the `TextCommand` class like needed permissions, if the command is allowed in private chats and a lot more. 
+
+
+## Further JDAW configuration
 
 - You can disable the default commands via the instance builder, (see [Pre-installed Commands](../../wiki/Preinstalled-Commands))
 - Enable the help command by providing a help configuration, see [Help Command Wiki](../../wiki/Help-Command). 
