@@ -7,7 +7,7 @@ import de.mspark.jdaw.cmdapi.TextCommand;
  * 
  * @author marcel
  */
-public interface JDAWConfig {
+public interface JdawConfig {
     
     /**
      * Global prefix for every command trigger. Text in messages have to start with this string in order to trigger the command action (except for custom TextListener).

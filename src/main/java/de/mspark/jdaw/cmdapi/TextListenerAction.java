@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import de.mspark.jdaw.guilds.GuildSettingsFinder;
 import de.mspark.jdaw.startup.JDAManager;
-import de.mspark.jdaw.startup.JDAWConfig;
+import de.mspark.jdaw.startup.JdawConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -30,7 +30,7 @@ public final class TextListenerAction extends ListenerAdapter {
 
     private final TextCommand commandProperties;
     private final GuildSettingsFinder guildConfig;
-    private final JDAWConfig jdawConfig;
+    private final JdawConfig jdawConfig;
 
     /**
      * Defines a command. {@link TextCommand} is necessary to define properties.

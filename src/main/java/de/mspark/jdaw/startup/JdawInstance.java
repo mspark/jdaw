@@ -32,12 +32,12 @@ public class JdawInstance {
     
     private final JDAManager jdas;
     private final GuildSettingsFinder guildConfig;
-    private final JDAWConfig globalConfig;
+    private final JdawConfig globalConfig;
 
     private final List<TextListenerAction> registeredActions = new LinkedList<>();
     private Collection<JdawEventListener> actionListeners = new HashSet<>();
 
-    JdawInstance(JDAManager jdas, GuildSettingsFinder guildConfig, JDAWConfig globalConfig) {
+    JdawInstance(JDAManager jdas, GuildSettingsFinder guildConfig, JdawConfig globalConfig) {
         this.jdas = jdas;
         this.guildConfig = guildConfig;
         this.globalConfig = globalConfig;

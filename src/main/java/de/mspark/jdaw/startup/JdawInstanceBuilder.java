@@ -42,7 +42,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
  */
 public class JdawInstanceBuilder {
 
-    private final JDAWConfig conf;
+    private final JdawConfig conf;
 
     private boolean loadDefaultCommands = true;
     private Optional<HelpConfig> helpConfig = Optional.empty();
@@ -50,7 +50,7 @@ public class JdawInstanceBuilder {
     private Collection<JDAConfigModifier> configModifiers = new LinkedList<>();
     private Collection<TextCommand> cmds = new ArrayList<>();
 
-    public JdawInstanceBuilder(JDAWConfig config) {
+    public JdawInstanceBuilder(JdawConfig config) {
         this.conf = config;
     }
 
