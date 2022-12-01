@@ -76,4 +76,8 @@ public class JdawInstance {
         actionListeners.addAll(Arrays.asList(listener));
     }
 
+    public JdawState getCurrentState() {
+        return createCurrentState();
+    }
+
 }
