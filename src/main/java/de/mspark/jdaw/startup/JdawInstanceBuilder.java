@@ -51,29 +51,38 @@ public class JdawInstanceBuilder {
     private Collection<TextCommand> cmds = new ArrayList<>();
 
     public JdawInstanceBuilder(JdawConfig config) {
+        if (config == null ) {
+            throw new IllegalArgumentException("Illegal config. Null");
+        }
+        if (config.defaultPrefix() == null) {
+            throw new IllegalArgumentException("Illegal config. You provided a JdawConfig but without a defaultPrefix");
+        }
+        if (config.apiTokens() == null || config.apiTokens().length == 0) {
+            throw new IllegalArgumentException("Illegal config. You provided a JdawConfig but without a discord API token");
+        }
+        
         this.conf = config;
     }
 
-    /**
-     * Enable guild 
-     * @param repo
-     * @return
-     */
+    // TODO
     public JdawInstanceBuilder enableGuildSpecificSettings(GuildRepository repo) {
         this.repo = of(repo);
         return this;
     }
 
+    // TODO
     public JdawInstanceBuilder enableHelpCommand(HelpConfig config) {
         this.helpConfig = Optional.of(config);
         return this;
     }
 
+    // TODO 
     public JdawInstanceBuilder disableMaintenanceCommands() {
         this.loadDefaultCommands = false;
         return this;
     }
 
+    // TODO
     public JdawInstanceBuilder addJdaModifier(JDAConfigModifier... visitor) {
         this.configModifiers.addAll(List.of(visitor));
         return this;
@@ -81,10 +90,11 @@ public class JdawInstanceBuilder {
 
     /**
      * Add a text command event listener to the JdawInstance. The register action takes place during build, see
-     * {@link #buildJdawInstance()}. Each command is also added as event listener.
+     * {@link #buildJdawInstance()}. Each command is also added as event listener during {@link #buildJdawInstance()}.
      * 
      * @param cmd The command to add to the bot
      * @return builder
+     * @see JdawInstance#register(TextCommand...)
      */
     public JdawInstanceBuilder addCommand(TextCommand... cmd) {
         this.cmds.addAll(List.of(cmd));
@@ -136,7 +146,7 @@ public class JdawInstanceBuilder {
 
     private void configurePrefixCommand(JdawInstance instance) {
         repo.ifPresent(r -> {
-            var prefixCmd = new PrefixSetCommand(r, a -> Optional.of(a) /* TODO */);
+            var prefixCmd = new PrefixSetCommand(r);
             cmds.add(prefixCmd);
         });
     }
