@@ -27,7 +27,7 @@ public class ListCommand extends TextCommand {
 
     @Override
     public boolean botAdminOnly() {
-        return true;
+        return false;
     }
 
     @Override
