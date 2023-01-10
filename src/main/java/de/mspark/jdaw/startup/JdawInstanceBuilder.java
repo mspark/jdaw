@@ -124,14 +124,18 @@ public class JdawInstanceBuilder {
     }
 
     private JDAManager configureDiscord() {
-        var priviledgedIntents = List.of(
-                GatewayIntent.GUILD_MESSAGES, 
-                GatewayIntent.MESSAGE_CONTENT, 
-                GatewayIntent.GUILD_MEMBERS);
+        // those intents are mandatory for this bot (due to the text based nature)
+        var priviledgedDefaultIntents = List.of(
+                GatewayIntent.GUILD_MESSAGES, // to receive messages
+                GatewayIntent.MESSAGE_CONTENT, // to receive message contents of guild channels
+                GatewayIntent.GUILD_MEMBERS); // Dont know? maybe permissions?
         List<JDABuilder> jdaBuilderList = Stream.of(conf.apiTokens())
-                .map(token -> JDABuilder.createDefault(token, priviledgedIntents))
+                .map(token -> JDABuilder.createDefault(token))
                 .toList();
-        jdaBuilderList.forEach(a -> configModifiers.forEach(j -> j.modify(a)));
+        jdaBuilderList.forEach(jdaBuilder -> {
+            jdaBuilder.enableIntents(priviledgedDefaultIntents);
+            configModifiers.forEach(j -> j.modify(jdaBuilder));            
+        });
         var jdas = jdaBuilderList.stream().map(Unchecked.function(JDABuilder::build)).toArray(JDA[]::new);
         return new JDAManager(jdas);
     }
