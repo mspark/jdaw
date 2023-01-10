@@ -3,6 +3,7 @@ package de.mspark.jdaw.cmdapi;
 import java.util.Arrays;
 
 import de.mspark.jdaw.startup.JDAManager;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
  * Provides setting options for the way commands are distributed to the respective JDA instances. <br>
@@ -17,7 +18,7 @@ public enum DistributionSetting {
      */
     MAIN_ONLY() {
         @Override
-        public void applySetting(JDAManager jdas, TextListenerAction listener) {
+        public void applySetting(JDAManager jdas, ListenerAdapter listener) {
             jdas.getMain().addEventListener(listener);
         }
     }, 
@@ -28,7 +29,7 @@ public enum DistributionSetting {
      */
     BALANCE() {
         @Override
-        public void applySetting(JDAManager jdas, TextListenerAction listener) {
+        public void applySetting(JDAManager jdas, ListenerAdapter listener) {
             jdas.getNextJDA().addEventListener(listener);
         }
     }, 
@@ -38,7 +39,7 @@ public enum DistributionSetting {
      */
     ALL() {
         @Override
-        public void applySetting(JDAManager jdas, TextListenerAction listener) {
+        public void applySetting(JDAManager jdas, ListenerAdapter listener) {
             Arrays.stream(jdas.getAllJdaRaw()).forEach(j -> j.addEventListener(listener));
         }
     };
@@ -49,5 +50,5 @@ public enum DistributionSetting {
      * @param jdas
      * @param listener
      */
-    public abstract void applySetting(JDAManager jdas, TextListenerAction listener);
+    public abstract void applySetting(JDAManager jdas, ListenerAdapter listener);
 }
