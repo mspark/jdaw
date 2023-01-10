@@ -12,6 +12,7 @@ import de.mspark.jdaw.startup.JDAManager;
 import de.mspark.jdaw.startup.JdawConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -69,13 +70,18 @@ public final class TextListenerAction extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if (checkAllowedScope(event)) {
-            var arguments = getCmdArguments(event.getMessage());
-            if (matchesTrigger(event.getMessage())) {
-                arguments.remove(0);
-                invokeOnTrigger(event.getMessage(), arguments);
-            }
+        if (!checkAllowedScope(event)) {
+            return;
         }
+        if (!event.getMessage().getContentStripped().startsWith(getPrefix(event.getMessage().getGuild()))) {
+            return;
+        }
+        if (!matchesTrigger(event.getMessage())) {
+            return;
+        }
+        var arguments = getCmdArguments(event.getMessage());
+        arguments.remove(0);
+        invokeOnTrigger(event.getMessage(), arguments);
     }
     
     private boolean checkAllowedScope(MessageReceivedEvent event) {
@@ -87,10 +93,13 @@ public final class TextListenerAction extends ListenerAdapter {
     }
 
     private boolean isChannelAllowed(MessageReceivedEvent event) {
-        var whitelist = guildConfig.getWhitelistChannel(event.getMessage());
+        if (!event.isFromGuild()) {
+            return true;
+        }
+        var whitelist = guildConfig.getWhitelistChannel(event.getMessage().getGuild().getIdLong());
         return whitelist.isEmpty() || whitelist.contains(event.getChannel().getId());
     }
-
+    
     private boolean matchesTrigger(Message msg) {
         var arguments = getCmdArguments(msg);
         if (arguments.isEmpty())
@@ -149,7 +158,7 @@ public final class TextListenerAction extends ListenerAdapter {
 
     private final List<String> getCmdArguments(Message msg) {
         String[] arguments = msg.getContentRaw().split("\\s+");
-        String prefix = triggerPrefix(msg);
+        String prefix = getPrefix(msg.getGuild());
         if (arguments.length > 0 && arguments[0].startsWith(prefix)) {
             arguments[0] = arguments[0].substring(prefix.length());
         }
@@ -188,7 +197,7 @@ public final class TextListenerAction extends ListenerAdapter {
             List<String> allTrigger = new ArrayList<String>();
             allTrigger.add(trigger());
             allTrigger.addAll(List.of(aliases()));
-            String prefix = triggerPrefix(msg);
+            String prefix = getPrefix(msg.getGuild());
             String aliasAppendix = allTrigger.stream()
                 .map(a -> prefix + a)
                 .collect(Collectors.joining(", "));
@@ -197,8 +206,12 @@ public final class TextListenerAction extends ListenerAdapter {
         return emb;
     }
     
-    private String triggerPrefix(Message msg) {
-        return guildConfig.retrieveGuildPrefix(msg).orElse(jdawConfig.defaultPrefix());
+    private String getPrefix(Guild guild) {
+        if (guild == null) {
+            return jdawConfig.defaultPrefix();
+        } else {
+            return guildConfig.getGuildSpecificPrefix(guild.getIdLong()).orElse(jdawConfig.defaultPrefix());
+        }
     }
 
 }
