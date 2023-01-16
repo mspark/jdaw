@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.jooq.lambda.Unchecked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.guilds.GuildRepository;
@@ -136,7 +138,11 @@ public class JdawInstanceBuilder {
             jdaBuilder.enableIntents(priviledgedDefaultIntents);
             configModifiers.forEach(j -> j.modify(jdaBuilder));            
         });
-        var jdas = jdaBuilderList.stream().map(Unchecked.function(JDABuilder::build)).toArray(JDA[]::new);
+        Logger log = LoggerFactory.getLogger(JdawInstanceBuilder.class);
+        var jdas = jdaBuilderList.stream()
+                .map(Unchecked.function(JDABuilder::build))
+                .peek(jda -> log.info("Connected as " + jda.getSelfUser().getAsTag()))
+                .toArray(JDA[]::new);
         return new JDAManager(jdas);
     }
     
