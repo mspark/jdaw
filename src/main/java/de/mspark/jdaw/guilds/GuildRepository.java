@@ -20,6 +20,11 @@ public interface GuildRepository {
      * @param prefix
      * @return The created settings object which was saved into persistent storage.
      */
-    SingleGuildSettings createAndSaveNew(Long gid, String prefix);
+    @Deprecated(since = "6.2")
+    default SingleGuildSettings createAndSaveNew(Long gid, String prefix) {
+        var setting = new SingleGuildSettings(gid, prefix);
+        this.save(setting);
+        return setting;
+    }
 
 }
