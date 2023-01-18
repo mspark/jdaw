@@ -123,7 +123,7 @@ You determine a lot of behaviour by overriding methods from the `TextCommand` cl
 # Use JDAW
 The JDAW package is not published in the maven central repository. Currently it is only available via github packages. In order to use this you need to configure your maven according to the offical [github documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token). In the end you need something like this in your `~/.m2/settings.xml`:
 
-```
+```xml
 <repository>
    <id>github</id>
    <url>https://maven.pkg.github.com/mspark/jdaw</url>
@@ -136,7 +136,7 @@ The JDAW package is not published in the maven central repository. Currently it 
 
 In your project pom you need to add the distribution management: 
 
-```
+```xml
 <distributionManagement>
 	<repository>
 		<id>github-jdaw</id>
@@ -148,7 +148,7 @@ In your project pom you need to add the distribution management:
 
 Now you can add the dependency to JDAW.
 
-```
+```xml
 <dependencies>
   <dependency>
     <groupId>de.mspark.de</groupId>
