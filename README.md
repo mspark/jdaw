@@ -159,6 +159,3 @@ Now you can add the dependency to JDAW.
 
 ```
 Get the latest version from the Githubs-Packages. See https//github.com/mspark/jdaw/packages/1115525
-
-# Spring Migration
-TODO
