@@ -12,7 +12,6 @@ import de.mspark.jdaw.startup.JDAManager;
 import de.mspark.jdaw.startup.JdawConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -73,7 +72,7 @@ public final class TextListenerAction extends ListenerAdapter {
         if (!checkAllowedScope(event)) {
             return;
         }
-        if (!event.getMessage().getContentStripped().startsWith(getPrefix(event.getMessage().getGuild()))) {
+        if (!event.getMessage().getContentStripped().startsWith(getPrefix(event.getMessage()))) {
             return;
         }
         if (!matchesTrigger(event.getMessage())) {
@@ -158,7 +157,7 @@ public final class TextListenerAction extends ListenerAdapter {
 
     private final List<String> getCmdArguments(Message msg) {
         String[] arguments = msg.getContentRaw().split("\\s+");
-        String prefix = getPrefix(msg.getGuild());
+        String prefix = getPrefix(msg);
         if (arguments.length > 0 && arguments[0].startsWith(prefix)) {
             arguments[0] = arguments[0].substring(prefix.length());
         }
@@ -197,7 +196,7 @@ public final class TextListenerAction extends ListenerAdapter {
             List<String> allTrigger = new ArrayList<String>();
             allTrigger.add(trigger());
             allTrigger.addAll(List.of(aliases()));
-            String prefix = getPrefix(msg.getGuild());
+            String prefix = getPrefix(msg);
             String aliasAppendix = allTrigger.stream()
                 .map(a -> prefix + a)
                 .collect(Collectors.joining(", "));
@@ -206,11 +205,12 @@ public final class TextListenerAction extends ListenerAdapter {
         return emb;
     }
     
-    private String getPrefix(Guild guild) {
-        if (guild == null) {
-            return jdawConfig.defaultPrefix();
-        } else {
+    private String getPrefix(Message msg) {
+        try {
+            var guild = msg.getGuild();
             return guildConfig.getGuildSpecificPrefix(guild.getIdLong()).orElse(jdawConfig.defaultPrefix());
+        } catch (IllegalStateException ex) {
+            return jdawConfig.defaultPrefix();
         }
     }
 
