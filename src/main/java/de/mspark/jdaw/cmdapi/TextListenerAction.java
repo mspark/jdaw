@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.mspark.jdaw.guilds.GuildSettingsFinder;
 import de.mspark.jdaw.startup.JDAManager;
 import de.mspark.jdaw.startup.JdawConfig;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -31,6 +33,7 @@ public final class TextListenerAction extends ListenerAdapter {
     private final TextCommand commandProperties;
     private final GuildSettingsFinder guildConfig;
     private final JdawConfig jdawConfig;
+    private JDA[] selfBots;
 
     /**
      * Defines a command. {@link TextCommand} is necessary to define properties.
@@ -51,7 +54,7 @@ public final class TextListenerAction extends ListenerAdapter {
      * @param jdas
      */
     public void startListenOnDiscordEvents(JDAManager jdas) {
-        commandProperties.distributionSetting().applySetting(jdas, this);
+        this.selfBots = commandProperties.distributionSetting().applySetting(jdas, this);
         commandProperties.onJdaRegistration(new JdawState(List.of(this), guildConfig, jdas, jdawConfig));
     }
 
@@ -69,6 +72,9 @@ public final class TextListenerAction extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
+        if (Stream.of(selfBots).map(b -> b.getSelfUser().getId()).anyMatch(event.getAuthor().getId()::equals)) {
+            return;
+        }
         if (!checkAllowedScope(event)) {
             return;
         }

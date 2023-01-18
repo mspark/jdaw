@@ -3,6 +3,7 @@ package de.mspark.jdaw.cmdapi;
 import java.util.Arrays;
 
 import de.mspark.jdaw.startup.JDAManager;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
@@ -18,8 +19,10 @@ public enum DistributionSetting {
      */
     MAIN_ONLY() {
         @Override
-        public void applySetting(JDAManager jdas, ListenerAdapter listener) {
-            jdas.getMain().addEventListener(listener);
+        public JDA[] applySetting(JDAManager jdas, ListenerAdapter listener) {
+            var jda = jdas.getMain();
+            jda.addEventListener(listener);
+            return new JDA[] {jda};
         }
     }, 
 
@@ -29,8 +32,10 @@ public enum DistributionSetting {
      */
     BALANCE() {
         @Override
-        public void applySetting(JDAManager jdas, ListenerAdapter listener) {
-            jdas.getNextJDA().addEventListener(listener);
+        public JDA[] applySetting(JDAManager jdas, ListenerAdapter listener) {
+            var jda = jdas.getNextJDA();
+            jda.addEventListener(listener);
+            return new JDA[] {jda};
         }
     }, 
 
@@ -39,8 +44,9 @@ public enum DistributionSetting {
      */
     ALL() {
         @Override
-        public void applySetting(JDAManager jdas, ListenerAdapter listener) {
+        public JDA[] applySetting(JDAManager jdas, ListenerAdapter listener) {
             Arrays.stream(jdas.getAllJdaRaw()).forEach(j -> j.addEventListener(listener));
+            return jdas.getAllJdaRaw();
         }
     };
 
@@ -49,6 +55,7 @@ public enum DistributionSetting {
      * 
      * @param jdas
      * @param listener
+     * @return The JDA instances where the adapter was registered on
      */
-    public abstract void applySetting(JDAManager jdas, ListenerAdapter listener);
+    public abstract JDA[] applySetting(JDAManager jdas, ListenerAdapter listener);
 }
