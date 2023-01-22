@@ -26,4 +26,9 @@ public class PingCommand extends TextCommand {
     public boolean executableWihtoutArgs() {
         return true;
     }
+    
+    @Override
+    public boolean privateChatAllowed() {
+        return true;
+    }
 }

@@ -34,6 +34,11 @@ public class ListCommand extends TextCommand {
     public boolean executableWihtoutArgs() {
         return true;
     }
+    
+    @Override
+    public boolean privateChatAllowed() {
+        return true;
+    }
 
     @Override
     public void onTrigger(Message msg, List<String> cmdArguments) {
