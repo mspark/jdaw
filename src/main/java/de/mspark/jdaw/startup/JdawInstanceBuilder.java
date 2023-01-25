@@ -2,6 +2,8 @@ package de.mspark.jdaw.startup;
 
 import static java.util.Optional.of;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -20,6 +22,8 @@ import de.mspark.jdaw.guilds.PrefixSetCommand;
 import de.mspark.jdaw.help.GlobalHelpCommand;
 import de.mspark.jdaw.help.HelpConfig;
 import de.mspark.jdaw.maintainance.BotCheckCommand;
+import de.mspark.jdaw.maintainance.Changelog;
+import de.mspark.jdaw.maintainance.ChangelogCmd;
 import de.mspark.jdaw.maintainance.ListCommand;
 import de.mspark.jdaw.maintainance.PingCommand;
 import net.dv8tion.jda.api.JDA;
@@ -51,6 +55,7 @@ public class JdawInstanceBuilder {
     private Optional<GuildRepository> repo = Optional.empty();
     private Collection<JDAConfigModifier> configModifiers = new LinkedList<>();
     private Collection<TextCommand> cmds = new ArrayList<>();
+    private Optional<String> changelogPath = Optional.empty();
 
     public JdawInstanceBuilder(JdawConfig config) {
         if (config == null ) {
@@ -78,7 +83,11 @@ public class JdawInstanceBuilder {
         return this;
     }
 
-    // TODO 
+    /**
+     * This disables default commands like "ping", "mlist", "botcheck". 
+     * 
+     * @return
+     */
     public JdawInstanceBuilder disableMaintenanceCommands() {
         this.loadDefaultCommands = false;
         return this;
@@ -100,6 +109,26 @@ public class JdawInstanceBuilder {
      */
     public JdawInstanceBuilder addCommand(TextCommand... cmd) {
         this.cmds.addAll(List.of(cmd));
+        return this;
+    }
+    
+    /**
+     * This enables the !sendchangelog command. For this you have to provide a path to a changelog file accessable 
+     * by the jar. It must have the following layout:
+     * <code><pre>
+     * Version 1.0.0
+     * - change 1
+     * - change 2
+     * ####
+     * Version 0.0.1
+     * - change 1
+     * </code></pre>
+     * When enabling the changelog command, you must also provide a {@link HelpConfig}. See wit
+     * @param changelog Path to a file which must be accessible or the JDAW build will fail
+     * @return
+     */
+    public JdawInstanceBuilder withChangelog(String changelog) {
+        this.changelogPath = Optional.of(changelog);
         return this;
     }
     
@@ -148,20 +177,34 @@ public class JdawInstanceBuilder {
     
     private void configureDefaultCommands(JdawInstance instance) {
         configureHelpCommand(instance);
-        configureListCommand(instance);
-        configurePrefixCommand(instance);
+        configureListCommand();
+        configurePrefixCommand();
+        configureChangelogCommand();
         cmds.add(new PingCommand());
         cmds.add(new BotCheckCommand());
     }
 
-    private void configurePrefixCommand(JdawInstance instance) {
+    private void configureChangelogCommand() {
+        changelogPath.ifPresent(path -> {
+            var help = helpConfig.orElseThrow(() -> new IllegalArgumentException("You must provide a HelpConfig in order to activate the changelog cmd."));
+            try {
+                var changelog = new Changelog(new File(path));
+                var changeCmd = new ChangelogCmd(help, changelog);
+                cmds.add(changeCmd);
+            } catch (FileNotFoundException e) {
+                throw new IllegalArgumentException(e);
+            }
+        });
+    }
+
+    private void configurePrefixCommand() {
         repo.ifPresent(r -> {
             var prefixCmd = new PrefixSetCommand(r);
             cmds.add(prefixCmd);
         });
     }
 
-    private void configureListCommand(JdawInstance instance) {
+    private void configureListCommand() {
         var listCmd = new ListCommand();
         cmds.add(listCmd);
     }
