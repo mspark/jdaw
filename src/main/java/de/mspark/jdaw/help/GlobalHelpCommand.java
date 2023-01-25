@@ -37,6 +37,7 @@ public class GlobalHelpCommand extends TextCommand  {
                 .filter(cmd -> cmd.userHasEnoughPermission(msg))
                 .filter(cmd -> cmd.helpPageWithAliases(msg).isPresent())
                 .forEach(cmd -> eb.addField(cmd.trigger(), cmd.description(), false));
+            HelpConfig.addFooter(eb, config);
             msg.getChannel().sendMessageEmbeds(eb.build()).submit();
         } else {
             String wantedHelpPage = cmdArguments.get(0);
