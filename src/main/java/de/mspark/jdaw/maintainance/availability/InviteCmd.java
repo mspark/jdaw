@@ -1,28 +1,37 @@
-package de.mspark.jdaw.maintainance;
+package de.mspark.jdaw.maintainance.availability;
 
 import java.util.Collection;
+import java.util.List;
 
-import org.slf4j.LoggerFactory;
-
+import de.mspark.jdaw.cmdapi.TextCommand;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.session.ReadyEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.entities.Message;
 
-public class InviteCmd extends ListenerAdapter {
+public class InviteCmd extends TextCommand {
 
-    private Collection<Permission> invitePermissions;
+    private final Collection<Permission> invitePerms;
 
-    public InviteCmd(Collection<Permission> invitePermissions) {
-        this.invitePermissions = invitePermissions;
+    public InviteCmd(Collection<Permission> invitePerms) {
+        this.invitePerms = invitePerms;
     }
 
     @Override
-    public void onReady(ReadyEvent event) {
-        if (event.getGuildAvailableCount() == 0) {
-            var logger = LoggerFactory.getLogger(InviteCmd.class);
-            logger.info("Bot is not connected to any server. Generating invite");
-            logger.info("Invite: " + event.getJDA().getInviteUrl(invitePermissions));
-        }
+    public String trigger() {
+        return "!minvite";
     }
 
+    @Override
+    public String description() {
+        return null;
+    }
+
+    @Override
+    public void onTrigger(Message msg, List<String> cmdArguments) {
+        msg.getChannel().sendMessage(msg.getJDA().getInviteUrl(invitePerms)).queue();
+    }
+
+    @Override
+    public boolean botAdminOnly() {
+        return true;
+    }
 }

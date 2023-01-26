@@ -22,12 +22,12 @@ import de.mspark.jdaw.guilds.GuildSettingsFinder;
 import de.mspark.jdaw.guilds.PrefixSetCommand;
 import de.mspark.jdaw.help.GlobalHelpCommand;
 import de.mspark.jdaw.help.HelpConfig;
-import de.mspark.jdaw.maintainance.BotCheckCommand;
 import de.mspark.jdaw.maintainance.Changelog;
 import de.mspark.jdaw.maintainance.ChangelogCmd;
-import de.mspark.jdaw.maintainance.InviteCmd;
 import de.mspark.jdaw.maintainance.ListCommand;
 import de.mspark.jdaw.maintainance.PingCommand;
+import de.mspark.jdaw.maintainance.availability.BotCheckCommand;
+import de.mspark.jdaw.maintainance.availability.InviteCheck;
 import kotlin.Pair;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -54,7 +54,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 public class JdawInstanceBuilder {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(JdawInstanceBuilder.class);
-
+    
     private final JdawConfig conf;
 
     private boolean loadDefaultCommands = true;
@@ -224,7 +224,7 @@ public class JdawInstanceBuilder {
         configureChangelogCommand();
         cmds.add(new PingCommand());
         cmds.add(new BotCheckCommand(botNeededPermissions));
-        this.addListenerAdapter(new InviteCmd(botNeededPermissions), DistributionSetting.ALL);
+        this.addListenerAdapter(new InviteCheck(botNeededPermissions), DistributionSetting.ALL);
     }
 
     private void configureChangelogCommand() {

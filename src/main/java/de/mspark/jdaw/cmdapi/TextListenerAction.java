@@ -57,19 +57,29 @@ public final class TextListenerAction extends ListenerAdapter {
         this.selfBots = commandProperties.distributionSetting().applySetting(jdas, this);
         commandProperties.onJdaRegistration(new JdawState(List.of(this), guildConfig, jdas, jdawConfig));
     }
-
+    
+    // in favor of getCommandSpecification()
+    @Deprecated(since = "6.3")
     public String description() {
         return commandProperties.description();
     }
-
+    
+    // in favor of getCommandSpecification()
+    @Deprecated(since = "6.3")
     public String trigger() {
         return commandProperties.trigger();
     }
 
+    // in favor of getCommandSpecification()
+    @Deprecated(since = "6.3")
     public String[] aliases() {
         return commandProperties.aliases();
     }
 
+    public TextCommand getCommandSpecification() {
+        return this.commandProperties;
+    }
+    
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (Stream.of(selfBots).map(b -> b.getSelfUser().getId()).anyMatch(event.getAuthor().getId()::equals)) {
@@ -177,11 +187,11 @@ public final class TextListenerAction extends ListenerAdapter {
         return neededPermList;
     }
 
-    public final boolean userHasEnoughPermission(Message context) {
-        var memberPerm = context.getMember().getPermissions();
+    public final boolean userHasEnoughPermission(Member memberToCheck) {
+        var memberPerm = memberToCheck.getPermissions();
         var missingPerms = extractMissingPermission(commandProperties.userGuildPermissions(), memberPerm);
 
-        return missingPerms.isEmpty() && globalBotAdminCheck(context.getAuthor());
+        return missingPerms.isEmpty() && globalBotAdminCheck(memberToCheck.getUser());
     }
 
     private boolean globalBotAdminCheck(User u) {

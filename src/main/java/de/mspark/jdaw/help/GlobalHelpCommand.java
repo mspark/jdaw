@@ -34,7 +34,7 @@ public class GlobalHelpCommand extends TextCommand  {
         if (cmdArguments.isEmpty()) {
             var eb = new EmbedBuilder().setTitle(config.botName()).setDescription(config.botDescription());
             allLoadedCmds.stream()
-                .filter(cmd -> cmd.userHasEnoughPermission(msg))
+                .filter(cmd -> cmd.userHasEnoughPermission(msg.getMember()))
                 .filter(cmd -> cmd.helpPageWithAliases(msg).isPresent())
                 .forEach(cmd -> eb.addField(cmd.trigger(), cmd.description(), false));
             HelpConfig.addFooter(eb, config);
@@ -44,7 +44,7 @@ public class GlobalHelpCommand extends TextCommand  {
             allLoadedCmds.stream()
                 .filter(c -> c.trigger().equalsIgnoreCase(wantedHelpPage))
                 .findFirst()
-                .filter(cmd -> cmd.userHasEnoughPermission(msg))
+                .filter(cmd -> cmd.userHasEnoughPermission(msg.getMember()))
                 .flatMap(c -> c.helpPageWithAliases(msg))
                 .ifPresentOrElse(
                     helpPage -> msg.getChannel().sendMessageEmbeds(helpPage).submit(),
