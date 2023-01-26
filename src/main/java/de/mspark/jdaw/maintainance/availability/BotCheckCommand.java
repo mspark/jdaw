@@ -1,6 +1,7 @@
 package de.mspark.jdaw.maintainance;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,11 @@ public class BotCheckCommand extends TextCommand  {
     }
 
     private JDA[] allBots;
+    private final Collection<Permission> botNeededPermissions;
+
+    public BotCheckCommand(Collection<Permission> botNeededPermissions) {
+        this.botNeededPermissions = botNeededPermissions;
+    }
 
     @Override
     public void onJdaRegistration(JdawState stateOnRegistration) {
@@ -52,7 +58,7 @@ public class BotCheckCommand extends TextCommand  {
 
     @Override
     public Permission[] userGuildPermissions() {
-        return new Permission[] { Permission.MANAGE_CHANNEL };
+        return new Permission[] { Permission.ADMINISTRATOR };
     }
 
     @Override
@@ -93,12 +99,11 @@ public class BotCheckCommand extends TextCommand  {
         return botOnGuildText;
     }
 
-    private static String missingBotInfoWithInvites(List<BotGuilds> botGuildList) {
-        var perms = new Permission[] { Permission.VOICE_MOVE_OTHERS };
+    private String missingBotInfoWithInvites(List<BotGuilds> botGuildList) {
         String missingBotText = botGuildList.stream()
             .filter(bg -> !bg.onServer)
             .map(bg -> "❌ %s is not present on this Server. [Invite it.](%s) \n"
-                .formatted(bg.bot.getSelfUser().getAsTag(), bg.bot.getInviteUrl(perms)))
+                .formatted(bg.bot.getSelfUser().getAsTag(), bg.bot.getInviteUrl(botNeededPermissions)))
             .reduce((a, b) -> a + "\n" + b).orElse("\nEvery bot is up!");
         return missingBotText;
     }

@@ -15,6 +15,7 @@ import org.jooq.lambda.Unchecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.mspark.jdaw.cmdapi.DistributionSetting;
 import de.mspark.jdaw.cmdapi.TextCommand;
 import de.mspark.jdaw.guilds.GuildRepository;
 import de.mspark.jdaw.guilds.GuildSettingsFinder;
@@ -24,10 +25,14 @@ import de.mspark.jdaw.help.HelpConfig;
 import de.mspark.jdaw.maintainance.BotCheckCommand;
 import de.mspark.jdaw.maintainance.Changelog;
 import de.mspark.jdaw.maintainance.ChangelogCmd;
+import de.mspark.jdaw.maintainance.InviteCmd;
 import de.mspark.jdaw.maintainance.ListCommand;
 import de.mspark.jdaw.maintainance.PingCommand;
+import kotlin.Pair;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 /**
@@ -47,6 +52,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
  * @author marcel
  */
 public class JdawInstanceBuilder {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdawInstanceBuilder.class);
 
     private final JdawConfig conf;
 
@@ -55,7 +62,9 @@ public class JdawInstanceBuilder {
     private Optional<GuildRepository> repo = Optional.empty();
     private Collection<JDAConfigModifier> configModifiers = new LinkedList<>();
     private Collection<TextCommand> cmds = new ArrayList<>();
+    private Collection<Pair<ListenerAdapter, DistributionSetting>> adapters = new LinkedList<>();
     private Optional<String> changelogPath = Optional.empty();
+    private Collection<Permission> botNeededPermissions = new LinkedList<>();
 
     public JdawInstanceBuilder(JdawConfig config) {
         if (config == null ) {
@@ -69,6 +78,17 @@ public class JdawInstanceBuilder {
         }
         
         this.conf = config;
+    }
+    
+    /**
+     * This sets the permissions which are necessary for the bot to work.
+     * The permissions are taken into account when generating invitations. 
+     * Also guild administrators can be notified in case the bot has insufficiant permissions.
+     */
+    //TODO document the exact behaviour when someone is notified
+    public JdawInstanceBuilder setNeededPermissions(Permission... perms) {
+        this.botNeededPermissions = List.of(perms);
+        return this;
     }
 
     // TODO
@@ -113,6 +133,22 @@ public class JdawInstanceBuilder {
     }
     
     /**
+     * Add additional {@link ListenerAdapter} to the JDA instance. 
+     * 
+     * @param cmd The ListenerAdapter - should not be a {@link TextCommand}
+     * @param setting On which JDA bots the adapter should registered on
+     * @return
+     */
+    public JdawInstanceBuilder addListenerAdapter(ListenerAdapter cmd, DistributionSetting setting) {
+        if (adapters.stream().anyMatch(p -> p.getFirst().equals(cmd))) {
+            LOGGER.warn("Ignoring registration request of at least one listener adapter. It was already registered as command");
+            return this;
+        }
+        this.adapters.add(new Pair<ListenerAdapter, DistributionSetting>(cmd, setting));
+        return this;
+    }
+    
+    /**
      * This enables the !sendchangelog command. For this you have to provide a path to a changelog file accessable 
      * by the jar. It must have the following layout:
      * <code><pre>
@@ -151,7 +187,12 @@ public class JdawInstanceBuilder {
         var cmdArray = cmds.toArray(TextCommand[]::new);
         instance.addJdawEventListener(cmdArray);
         instance.register(cmds.toArray(cmdArray));
+        registerAdapters(jdaManager);
         return instance;
+    }
+
+    private void registerAdapters(JDAManager jdaManager) {
+        this.adapters.forEach(p -> p.component2().applySetting(jdaManager, p.component1()));
     }
 
     private JDAManager configureDiscord() {
@@ -172,6 +213,7 @@ public class JdawInstanceBuilder {
                 .map(Unchecked.function(JDABuilder::build))
                 .peek(jda -> log.info("Connected as " + jda.getSelfUser().getAsTag()))
                 .toArray(JDA[]::new);
+        
         return new JDAManager(jdas);
     }
     
@@ -181,7 +223,8 @@ public class JdawInstanceBuilder {
         configurePrefixCommand();
         configureChangelogCommand();
         cmds.add(new PingCommand());
-        cmds.add(new BotCheckCommand());
+        cmds.add(new BotCheckCommand(botNeededPermissions));
+        this.addListenerAdapter(new InviteCmd(botNeededPermissions), DistributionSetting.ALL);
     }
 
     private void configureChangelogCommand() {
