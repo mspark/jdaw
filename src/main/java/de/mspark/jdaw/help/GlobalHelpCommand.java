@@ -36,13 +36,13 @@ public class GlobalHelpCommand extends TextCommand  {
             allLoadedCmds.stream()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg.getMember()))
                 .filter(cmd -> cmd.helpPageWithAliases(msg).isPresent())
-                .forEach(cmd -> eb.addField(cmd.trigger(), cmd.description(), false));
+                .forEach(cmd -> eb.addField(cmd.getCommandSpecification().trigger(), cmd.getCommandSpecification().description(), false));
             HelpConfig.addFooter(eb, config);
             msg.getChannel().sendMessageEmbeds(eb.build()).submit();
         } else {
             String wantedHelpPage = cmdArguments.get(0);
             allLoadedCmds.stream()
-                .filter(c -> c.trigger().equalsIgnoreCase(wantedHelpPage))
+                .filter(c -> c.getCommandSpecification().trigger().equalsIgnoreCase(wantedHelpPage))
                 .findFirst()
                 .filter(cmd -> cmd.userHasEnoughPermission(msg.getMember()))
                 .flatMap(c -> c.helpPageWithAliases(msg))
@@ -73,7 +73,7 @@ public class GlobalHelpCommand extends TextCommand  {
     }
     
     private void addAction(TextListenerAction action) {
-        if (!action.trigger().equals(trigger())) {
+        if (!action.getCommandSpecification().trigger().equals(trigger())) {
             this.allLoadedCmds.add(action);
         }
     }

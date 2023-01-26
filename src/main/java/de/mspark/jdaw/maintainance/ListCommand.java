@@ -43,7 +43,7 @@ public class ListCommand extends TextCommand {
     @Override
     public void onTrigger(Message msg, List<String> cmdArguments) {
         Optional<String> triggerListText = allLoadedCmds.stream()
-                .map(t -> t.trigger() + " | Aliases: " + Arrays.toString(t.aliases()))
+                .map(t -> t.getCommandSpecification().trigger() + " | Aliases: " + Arrays.toString(t.getCommandSpecification().aliases()))
                 .reduce((a, b) -> a + "\n" + b);
         var embed = new EmbedBuilder().setTitle(description())
                 .setDescription(triggerListText.orElse("No commands available"));
