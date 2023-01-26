@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,8 @@ public class JdawInstanceBuilder {
     private Collection<TextCommand> cmds = new ArrayList<>();
     private Collection<Pair<ListenerAdapter, DistributionSetting>> adapters = new LinkedList<>();
     private Optional<String> changelogPath = Optional.empty();
-    private Collection<Permission> botNeededPermissions = new LinkedList<>();
+    private Collection<Permission> botNeededPermissions = new HashSet<>();
+    private boolean autoDiscoverPermissions = false;
 
     public JdawInstanceBuilder(JdawConfig config) {
         if (config == null ) {
@@ -88,6 +90,19 @@ public class JdawInstanceBuilder {
     //TODO document the exact behaviour when someone is notified
     public JdawInstanceBuilder setNeededPermissions(Permission... perms) {
         this.botNeededPermissions = List.of(perms);
+        return this;
+    }
+    
+    /**
+     * Decides if JDAW should auto discover necessary permissions. JDAW will scan every commands necessary permissions (see T {@link TextCommand#botGuildPermissions()}) use them for the bot as a whole. 
+     * Keep in mind, in case you have any bot command which needs the Administrator permission, the whole bot will request it. 
+     * With method {@link #setNeededPermissions(Permission...)} additional permissions can be added as well.
+     * 
+     * @param enabled
+     * @return
+     */
+    public JdawInstanceBuilder enableDiscoverCmdPermissions(boolean enabled) {
+        this.autoDiscoverPermissions = enabled;
         return this;
     }
 
@@ -222,9 +237,21 @@ public class JdawInstanceBuilder {
         configureListCommand();
         configurePrefixCommand();
         configureChangelogCommand();
+        permissionAutoDiscovery();
         cmds.add(new PingCommand());
         cmds.add(new BotCheckCommand(botNeededPermissions));
         this.addListenerAdapter(new InviteCheck(botNeededPermissions), DistributionSetting.ALL);
+    }
+    
+    private void permissionAutoDiscovery() {
+        if (autoDiscoverPermissions) {
+            if (botNeededPermissions.contains(Permission.ADMINISTRATOR)) {
+                botNeededPermissions.clear();
+                botNeededPermissions.add(Permission.ADMINISTRATOR);
+            } else {
+                cmds.forEach(cmd -> botNeededPermissions.addAll(List.of(cmd.botGuildPermissions())));
+            }
+        }
     }
 
     private void configureChangelogCommand() {
